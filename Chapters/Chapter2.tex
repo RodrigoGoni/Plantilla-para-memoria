@@ -1,86 +1,92 @@
 % --- Esqueleto para el Capítulo 2 ---
 
-
 \chapter{Introducción específica}
 \label{Chapter2}
 
 % Párrafo introductorio del capítulo.
 
-En este capítulo se presenta el marco metodológico y teórico que sustentó el desarrollo del trabajo. Se detallan las fases del modelo de gestión adaptado, las tecnologías de \textit{software} seleccionadas para el análisis y la optimización, y las métricas definidas para la validación del sistema. 
-El contenido de este capítulo se basa en la planificación y los conceptos establecidos en el documento de gestión del proyecto \citep{RGv5Goni}. % Ejemplo de cita
+En este capítulo se presenta el marco teórico que sustentó el desarrollo del
+trabajo. Se detallan las tecnologías de \textit{software} seleccionadas para el
+análisis y la optimización, y las métricas definidas para la validación del
+sistema. El contenido de este capítulo se basa en la planificación y los
+conceptos establecidos en el documento de gestión del proyecto
+\citep{RGv5Goni}. % Ejemplo de cita
 
-\section{Metodología}
-\label{sec:metodologia}
-
-% Tono: Pasado (describe lo que SE HIZO en el proyecto).
-Para la gestión y ejecución de este trabajo, se adaptó la metodología CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}). Esta adaptación fue necesaria para alinear las fases estándar de un proyecto de minería de datos con los objetivos específicos de un proyecto de optimización biomecánica asistida por inteligencia artificial, como se describe en la sección 8 del documento de planificación \citep{RGv5Goni}.
-
-% Tono: Pasado (el trabajo de adaptación).
-El modelo se reestructuró en las siguientes fases principales, ajustadas al contexto del trabajo:
-
-\begin{itemize}
-    \item Comprensión del negocio y del problema biomecánico.
-    \item Comprensión y adquisición de los datos (video, sensores de rendimiento y datos antropométricos).
-    \item Preparación y preprocesamiento de los datos, incluyendo la extracción de pose y el filtrado de señales.
-    \item Modelado y simulación biomecánica y aerodinámica.
-    \item Evaluación de las soluciones generadas por el optimizador (análisis del frente de Pareto).
-    \item Despliegue, materializado en la generación del reporte de recomendaciones para el ciclista.
-\end{itemize}
-
-La figura \ref{fig:crisp_dm_flujo} muestra el diagrama de flujo de la metodología implementada.
-
-\begin{figure}[htb!]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{Imagenes/crisp_dm.png} % Descomentar para usar la imagen real
-    
-    % --- Inicio: Placeholder de la figura ---
-    % Se utiliza \framebox para un placeholder robusto.
-	\includegraphics[width=0.7\textwidth]{./Figures/crispdm.pdf}
-    % --- Fin: Placeholder de la figura ---
-    
-    \caption{Diagrama de flujo de la metodología CRISP-DM adaptada para el trabajo.}
-    \label{fig:crisp_dm_flujo}
-\end{figure}
 % ------------------------------------------
 
 \section{Marco teórico}
 \label{sec:marco_teorico}
 
 % Tono: Presente (describe la teoría).
-El desarrollo del sistema se fundamentó en dos pilares tecnológicos principales: la visión artificial para el análisis cinemático y los algoritmos genéticos para la optimización.
+El desarrollo del sistema se fundamentó en dos pilares tecnológicos
+principales: la visión artificial para el análisis cinemático y los algoritmos
+genéticos para la optimización.
 
 \subsection{Visión artificial para estimación de pose}
 \label{ssec:vision_pose}
 
 % Tono: Pasado (lo que se investigó/hizo).
-Para la extracción de las coordenadas 2D de los puntos clave del ciclista desde la captura de video, se realizó un análisis de las herramientas de estimación de pose (\textit{pose estimation}) disponibles. Se evaluaron modelos preentrenados como Keypoint R-CNN y MediaPipe, mencionados en la planificación del proyecto \citep{RGv5Goni}.
+Para la extracción de las coordenadas 2D de los puntos clave del ciclista desde
+la captura de video, se realizó un análisis de las herramientas de estimación
+de pose (\textit{pose estimation}) disponibles. Se evaluaron modelos
+preentrenados como Keypoint R-CNN \citep{maskrcnn} y MediaPipe \citep{MediaPipe}, mencionados en la planificación
+del proyecto \citep{RGv5Goni}.
 
 % Tono: Presente (teoría).
-Estos modelos utilizan redes neuronales convolucionales profundas (CNN) para identificar y localizar articulaciones humanas clave (ej. codos, rodillas, tobillos) en cada fotograma. Las CNN se han convertido en el estándar en tareas de visión por computador, con un diseño inspirado en el córtex visual humano. Su principio fundamental es la abstracción jerárquica de características \citep{oshea2015introduction}: las capas iniciales detectan rasgos de bajo nivel como bordes y texturas, que se componen en representaciones más complejas en capas sucesivas.
+Estos modelos utilizan redes neuronales convolucionales profundas (CNN) para
+identificar y localizar articulaciones humanas clave (ej. codos, rodillas,
+tobillos) en cada fotograma. Las CNN se han convertido en el estándar en tareas
+de visión por computador, con un diseño inspirado en el córtex visual humano.
+Su principio fundamental es la abstracción jerárquica de características
+\citep{oshea2015introduction}. Las capas iniciales detectan rasgos de bajo
+nivel como bordes y texturas, que se componen en representaciones más complejas
+en capas sucesivas.
 
-El paradigma dominante actual para esta tarea no es la regresión directa de coordenadas, la cual demostró ser difícil, particularmente ante oclusiones \citep{ar5iv_heatmap_regression}. En su lugar, el problema se reformula como la detección basada en mapas de calor (\textit{heatmaps}) \citep{medium_vanishing_point_heatmap}. En este enfoque, la CNN genera un conjunto de mapas de calor 2D, uno por cada articulación \citep{stackoverflow_parse_heatmap}. Cada mapa de calor funciona como una distribución de probabilidad espacial, donde el valor de cada píxel representa la confianza de que la articulación se ubique allí. Este método permite codificar la incertidumbre: una articulación visible genera un pico de alta confianza, mientras que una articulación oculta se representa por un pico más difuso y bajo.
+El paradigma dominante actual para esta tarea no es la regresión directa de
+coordenadas, la que demostró ser difícil, particularmente ante oclusiones
+\citep{ar5iv_heatmap_regression}. En su lugar, el problema se reformula como la
+detección basada en mapas de calor (\textit{heatmaps})
+\citep{medium_vanishing_point_heatmap}. En este enfoque, la CNN genera un
+conjunto de mapas de calor 2D, uno por cada articulación
+\citep{stackoverflow_parse_heatmap}. Cada mapa de calor funciona como una
+distribución de probabilidad espacial, donde el valor de cada píxel representa
+la confianza de que la articulación se ubique allí. Este método permite
+codificar la incertidumbre: una articulación visible genera un pico de alta
+confianza, mientras que una articulación oculta se representa por un pico más
+difuso y bajo.
 
 % Tono: Pasado (la decisión tomada).
-Finalmente, se seleccionó el modelo \textit{MediaPipe BlazePose}. Esta decisión no se basó únicamente en la precisión, sino en dos justificaciones de dominio específicas. Primero, su alineación con la tarea: BlazePose es un rastreador (\textit{tracker}) optimizado para la coherencia temporal en \textit{vídeo} \citep{learnopencv_yolov7_vs_mediapipe}, a diferencia de los modelos que detectan en cada fotograma. Segundo, su alineación con el dominio biomecánico: el modelo predice una topología de 33 \textit{landmarks} 3D \citep{googleai_pose_landmarker} que incluye puntos clave en pies y talones, elementos indispensables para el análisis biomecánico del ciclismo que no están presentes en las 17 articulaciones de los modelos COCO \citep{learnopencv_keypoint_rcnn}.
+Finalmente, se seleccionó el modelo \texttt{MediaPipe BlazePose}. Esta decisión
+no se basó únicamente en la precisión, sino en dos justificaciones de dominio
+específicas. En primer lugar, su alineación con la tarea: BlazePose es un
+rastreador (\textit{tracker}) optimizado para la coherencia temporal en
+vídeo \citep{learnopencv_yolov7_vs_mediapipe}, a diferencia de los
+modelos que detectan en cada fotograma. En segundo lugar, su alineación con el
+dominio biomecánico: el modelo predice una topología de 33 \textit{landmarks}
+3D \citep{googleai_pose_landmarker} que incluye puntos clave en pies y talones,
+elementos indispensables para el análisis biomecánico del ciclismo que no están
+presentes en las 17 articulaciones de los modelos COCO
+\citep{learnopencv_keypoint_rcnn}.
 
 % Tono: Presente (descripción de la tabla).
-En la tabla \ref{tab:comparativa_modelos} se presenta una comparativa de los modelos evaluados.
+En la tabla \ref{tab:comparativa_modelos} se presenta una comparativa de los
+modelos evaluados.
 
 % ----- Placeholder: Tabla Comparativa -----
 \begin{table}[htbp]
-    \caption{Tabla comparativa de modelos de estimación de pose.}
-    \label{tab:comparativa_modelos}
-    \centering
-    \small
-    \begin{tabular}{p{3cm}p{3cm}p{2.5cm}p{5cm}}
-        \toprule
-        \textbf{Modelo} & \textbf{Precisión (mAP)} & \textbf{Velocidad (FPS)} & \textbf{Observaciones} \\
-        \midrule
-        MediaPipe BlazePose & 62.6 - 68.1 (en 17 kpts) \citep{ar5iv_blazepose_ghum} & \textasciitilde{}30 FPS (CPU Laptop) \citep{learnopencv_yolov7_vs_mediapipe} & Optimizado para \textit{tracking} en video. Topología de 33 \textit{landmarks} 3D \citep{googleai_pose_landmarker}. \\
-        \midrule
-        Keypoint R-CNN & 64.0 (kp. AP en COCO) \citep{detectrontest_model_zoo} & \textasciitilde{}13.8 FPS (GPU V100) \citep{detectrontest_model_zoo} & Alta precisión. Costo escala linealmente con Nro. de personas \citep{learnopencv_yolov7_vs_mediapipe}. \\
-        \bottomrule
-    \end{tabular}
+      \caption{Tabla comparativa de modelos de estimación de pose.}
+      \label{tab:comparativa_modelos}
+      \centering
+      \small
+      \begin{tabular}{p{2.5cm}p{2.2cm}p{2.2cm}p{5.5cm}}
+            \toprule
+            \textbf{Modelo}     & \textbf{mAP}                                          & \textbf{FPS}                                                & \textbf{Observaciones}                                                                                              \\
+            \midrule
+            MediaPipe BlazePose & 62.6--68.1 en 17 kpts \citep{ar5iv_blazepose_ghum} & $\sim$30 FPS CPU \citep{learnopencv_yolov7_vs_mediapipe} & Optimizado para \textit{tracking} en video. Topología de 33 \textit{landmarks} 3D \citep{googleai_pose_landmarker}. \\
+            \midrule
+            Keypoint R-CNN      & 63.1 kp. AP en COCO \citep{maskrcnn} & $\sim$5 FPS \citep{maskrcnn}  & Alta precisión. Costo escala linealmente con número de personas \citep{learnopencv_yolov7_vs_mediapipe}.             \\
+            \bottomrule
+      \end{tabular}
 \end{table}
 % -------------------------------------------
 
@@ -88,43 +94,85 @@ En la tabla \ref{tab:comparativa_modelos} se presenta una comparativa de los mod
 \label{ssec:algoritmos-geneticos}
 
 % Tono: Presente (teoría).
-Los algoritmos genéticos (AG, \textit{Genetic Algorithms}) son metaheurísticas de búsqueda inspiradas en el proceso de selección natural \citep{adictosaltrabajo_jgap, ceca_uaeh_algoritmos_geneticos}. Pertenecen a la clase más amplia de algoritmos evolutivos y son particularmente efectivos para problemas de optimización complejos, multimodales y no lineales, donde los métodos determinísticos tradicionales pueden fallar.
+Los algoritmos genéticos (AG, \textit{Genetic Algorithms}) son metaheurísticas
+de búsqueda inspiradas en el proceso de selección natural \citep{goldberg1989}. Pertenecen a la clase más amplia de algoritmos evolutivos y
+son particularmente efectivos para problemas de optimización complejos,
+multimodales y no lineales, donde los métodos determinísticos tradicionales
+pueden fallar \citep{goldberg1989}.
 
-El funcionamiento de un AG se basa en la evolución de una población de soluciones candidatas (individuos) durante varias generaciones. Cada individuo representa una solución potencial completa al problema y se codifica en un cromosoma. Para problemas de ingeniería, se utiliza comúnmente una codificación de valor real.
+El funcionamiento de un algoritmo genético se basa en la evolución de una
+población de soluciones candidatas (individuos) durante varias generaciones
+\citep{goldberg1989}. Cada individuo representa una solución potencial
+completa al problema y se codifica en un cromosoma \citep{goldberg1989}. Para problemas de ingeniería, se utiliza comúnmente una
+codificación de valor real.
 
-El componente más crítico es la función de aptitud (\textit{fitness function}), que es la única conexión del algoritmo con el problema de dominio. Esta función toma un individuo como entrada y devuelve un valor escalar que cuantifica la calidad de esa solución. El objetivo del AG es maximizar (o minimizar) este valor.
+El componente más crítico es la función de aptitud (\textit{fitness function}),
+que es la única conexión del algoritmo con el problema de dominio. Esta función
+toma un individuo como entrada y devuelve un valor escalar que cuantifica la
+calidad de esa solución \citep{goldberg1989}. El objetivo del algoritmo
+genético es maximizar (o minimizar) este valor.
 
-La evolución de la población se logra mediante la aplicación iterativa de operadores genéticos:
+La evolución de la población se logra mediante la aplicación iterativa de
+operadores genéticos \citep{goldberg1989}:
 \begin{itemize}
-    \item Selección: determina qué individuos de la población actual se reproducirán, basándose en el principio de que los individuos con mayor aptitud deben tener una mayor probabilidad de ser seleccionados. Un método robusto y común es la selección por torneo \citep{youtube_seleccion_individuos, wikipedia_seleccion_torneos}.
-    \item Cruce (\textit{Crossover}): es el operador de explotación. Combina la información genética de dos individuos parentales para crear descendencia, con el objetivo de heredar rasgos beneficiosos y converger en regiones prometedoras del espacio de búsqueda.
-    \item Mutación: es el operador de exploración. Introduce cambios pequeños y aleatorios en el cromosoma de un individuo. Es esencial para mantener la diversidad genética y permitir que el algoritmo escape de óptimos locales.
+      \item Selección: se determina qué individuos de la población actual se reproducirán,
+            con base en el principio de que los individuos con mayor aptitud deben tener
+            una mayor probabilidad de ser seleccionados \citep{goldberg1989}. Un
+            método robusto y común es la selección por torneo
+            \citep{youtube_seleccion_individuos, wikipedia_seleccion_torneos}.
+      \item Cruce (\textit{crossover}): es el operador de explotación. Combina la
+            información genética de dos individuos parentales para crear descendencia, con
+            el objetivo de heredar rasgos beneficiosos y converger en regiones prometedoras
+            del espacio de búsqueda \citep{goldberg1989}.
+      \item Mutación: es el operador de exploración. Introduce cambios pequeños y
+            aleatorios en el cromosoma de un individuo \citep{goldberg1989}. Es
+            esencial para mantener la diversidad genética y permitir que el algoritmo
+            escape de óptimos locales \citep{goldberg1989}.
 \end{itemize}
-El poder del AG reside en el equilibrio entre la explotación (cruce) y la exploración (mutación), previniendo la convergencia prematura a soluciones subóptimas \citep{datacamp_genetic_algorithm_python, sedici_algoritmos_evolutivos_avanzados, wikipedia_algoritmo_genetico}.
+El poder del algoritmo genético reside en el equilibrio entre la explotación (cruce) y la exploración (mutación), lo que previene la convergencia prematura a soluciones subóptimas \citep{goldberg1989}.
 
-% Tono: Pasado (aplicación en el proyecto).
-En este proyecto, se utilizó un AG para explorar el espacio de soluciones de los parámetros biomecánicos, como se detalla en la sección \ref{sec:optimizacion}.
+% Tono: Pasado (aplicación en el trabajo).
+En este trabajo, se utilizó un algoritmo genético para explorar el espacio de
+soluciones de los parámetros biomecánicos, como se detalla en la sección
+\ref{sec:optimizacion}.
 \section{Algoritmos de optimización}
 \label{sec:optimizacion}
 
 % Tono: Presente (definición del problema).
-El problema central del proyecto se define como un problema de optimización multiobjetivo (MOO, \textit{Multi-Objective Optimization}). A diferencia de la optimización mono-objetivo, la MOO busca optimizar simultáneamente dos o más funciones objetivo que, a menudo, están en conflicto.
+El problema central del trabajo se definió como un problema de optimización
+multiobjetivo (MOO, \textit{Multi-Objective Optimization}). A diferencia de la
+optimización mono-objetivo, la MOO busca optimizar simultáneamente dos o más
+funciones objetivo que, a menudo, están en conflicto.
 
-% Tono: Pasado (aplicación en el proyecto).
-En el contexto de este trabajo, los objetivos en conflicto fueron la maximización de la eficiencia biomecánica y la minimización de la resistencia aerodinámica, sujeto a un conjunto de restricciones biomecánicas para prevenir lesiones.
+% Tono: Pasado (aplicación en el trabajo).
+En el contexto de este trabajo, los objetivos en conflicto fueron la
+maximización de la eficiencia biomecánica y la minimización de la resistencia
+aerodinámica, sujetos a un conjunto de restricciones biomecánicas para prevenir
+lesiones.
 
 % Tono: Presente (teoría).
-La solución a un problema MOO no es un único valor óptimo, sino un conjunto de soluciones óptimas de compromiso, conocido como el frente de Pareto. Cada solución en el frente de Pareto es óptima en el sentido de que no se puede mejorar un objetivo sin empeorar al menos otro.
+La solución a un problema MOO no es un único valor óptimo, sino un conjunto de
+soluciones óptimas de compromiso, conocido como el frente de Pareto. Cada
+solución en el frente de Pareto es óptima en el sentido de que no se puede
+mejorar un objetivo sin empeorar al menos otro.
 
 % Tono: Presente (descripción de la figura).
-La figura \ref{fig:pareto_conceptual} ilustra el concepto de la frontera de Pareto en el contexto de los objetivos del proyecto. La superficie coloreada representa la frontera (envolvente convexa) que conecta todas las soluciones Pareto-óptimas, formando el límite del espacio de soluciones factibles. Los puntos negros sobre la superficie son las soluciones específicas evaluadas por el algoritmo genético. El punto dorado (diamante) indica la solución de compromiso recomendada, que balancea los tres objetivos simultáneamente, mientras que los puntos cuadrados (azul, rojo y verde) muestran las soluciones que optimizan cada objetivo de forma individual.
+La figura \ref{fig:pareto_conceptual} ilustra el concepto de la frontera de
+Pareto en el contexto de los objetivos del trabajo. La superficie coloreada
+representa la frontera (envolvente convexa) que conecta todas las soluciones
+Pareto-óptimas, formando el límite del espacio de soluciones factibles. Los
+puntos negros sobre la superficie son las soluciones específicas evaluadas por
+el algoritmo genético. El punto dorado (diamante) indica la solución de
+compromiso recomendada, que balancea los tres objetivos simultáneamente,
+mientras que los puntos cuadrados (azul, rojo y verde) muestran las soluciones
+que optimizan cada objetivo de forma individual.
 
 % ----- Figura: Frontera de Pareto 3D -----
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=0.85\textwidth]{./Figures/pareto_clean.pdf}
-    \caption{Frontera de Pareto tridimensional con los tres objetivos a minimizar: coeficiente aerodinámico (CdA), frecuencia cardíaca y riesgo de lesión.}
-    \label{fig:pareto_conceptual}
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/pareto_clean.pdf}
+      \caption{Frontera de Pareto tridimensional con los tres objetivos a minimizar: coeficiente aerodinámico (CdA), frecuencia cardíaca y riesgo de lesión.}
+      \label{fig:pareto_conceptual}
 \end{figure}
 % ---------------------------------------
 
@@ -132,69 +180,98 @@ La figura \ref{fig:pareto_conceptual} ilustra el concepto de la frontera de Pare
 \label{sec:metricas}
 
 % Tono: Pasado (se definieron).
-Para evaluar la efectividad de las configuraciones recomendadas por el sistema, se definió un conjunto de métricas objetivas y subjetivas, basadas en la sección 5 (Evaluación del modelo) de la planificación \citep{RGv5Goni}.
+Para evaluar la efectividad de las configuraciones recomendadas por el sistema,
+se definió un conjunto de métricas objetivas y subjetivas, basadas en la
+sección 5 (evaluación del modelo) de la planificación \citep{RGv5Goni}.
 
 \subsection{Métricas objetivas}
 \label{ssec:metricas_objetivas}
 
 % Tono: Presente (definiciones).
-Las métricas objetivas son mediciones cuantitativas directas obtenidas de los sensores y del análisis cinemático.
+Las métricas objetivas son mediciones cuantitativas directas obtenidas de los
+sensores y del análisis cinemático.
 
 \begin{itemize}
-    \item Eficiencia cardiovascular (FC): se define como la reducción de la frecuencia cardíaca (FC) media para un bloque de potencia constante y duración definida. Una FC menor para el mismo esfuerzo indica una mayor eficiencia. Se consideran las zonas cardíacas como referencia (Z1-Z5) para contextualizar el esfuerzo.
-    
-    \item Potencia (W): medición de la potencia de salida sostenida durante el intervalo de análisis. Se registra la potencia media, máxima y normalizada, considerando las zonas de potencia funcionales (FTP, \textit{Functional Threshold Power}) del ciclista para evaluar la intensidad del esfuerzo.
-    
-    \item Cadencia (RPM): frecuencia de pedaleo expresada en revoluciones por minuto. Una cadencia óptima suele estar entre 80--100 RPM para la mayoría de ciclistas, aunque depende del perfil individual.
-    
-    \item Velocidad (km/h): velocidad de desplazamiento medida durante el test en condiciones controladas (ej. rodillo inteligente o circuito cerrado).
-    
-    \item Balance de potencia L/R (\%): distribución de la potencia generada entre la pierna izquierda y derecha. Un balance óptimo es cercano a 50\%/50\%, aunque desbalances menores al 5\% son considerados normales. Desbalances mayores pueden indicar asimetrías biomecánicas o riesgo de lesión.
-    
-    \item Fase de potencia (\textit{Power Phase}): rango angular del ciclo de pedaleo donde cada pierna genera potencia positiva. Se mide en grados y permite identificar la eficiencia de la aplicación de fuerza durante el pedaleo.
-    
-    \item Desfase de fase de potencia (\textit{Power Phase Offset}): diferencia angular entre el inicio de la fase de potencia de cada pierna. Valores elevados pueden indicar asimetrías en el patrón de pedaleo.
-    
-    \item Variabilidad cinemática: se define como la desviación estándar de ángulos articulares clave (ej. extensión de rodilla, flexión de cadera) durante múltiples ciclos de pedaleo. Una menor variabilidad sugiere un movimiento más estable, eficiente y con menor riesgo de lesiones por sobrecarga.
+      \item Eficiencia cardiovascular (FC): se define como la reducción de la frecuencia
+            cardíaca (FC) media para un bloque de potencia constante y duración definida.
+            Una FC menor para el mismo esfuerzo indica una mayor eficiencia. Se consideran
+            las zonas cardíacas como referencia (Z1-Z5) para contextualizar el esfuerzo.
+
+      \item Potencia (W): medición de la potencia de salida sostenida durante el intervalo
+            de análisis. Se registra la potencia media, máxima y normalizada, considerando
+            las zonas de potencia funcionales (FTP, \textit{Functional Threshold Power})
+            del ciclista para evaluar la intensidad del esfuerzo.
+
+      \item Cadencia (RPM): frecuencia de pedaleo expresada en revoluciones por minuto. Una
+            cadencia óptima suele estar entre 80--100 RPM para la mayoría de ciclistas,
+            aunque depende del perfil individual.
+
+      \item Velocidad (km/h): velocidad de desplazamiento medida durante el test en
+            condiciones controladas (ej. rodillo inteligente o circuito cerrado).
+
+      \item Balance de potencia L/R (\%): distribución de la potencia generada entre la
+            pierna izquierda y derecha. Un balance óptimo es cercano a 50\%/50\%, aunque
+            desbalances menores al 5\% son considerados normales. Desbalances mayores
+            pueden indicar asimetrías biomecánicas o riesgo de lesión.
+
+      \item Fase de potencia (\textit{Power Phase}): rango angular del ciclo de pedaleo
+            donde cada pierna genera potencia positiva. Se mide en grados y permite
+            identificar la eficiencia de la aplicación de fuerza durante el pedaleo.
+
+      \item Desfase de fase de potencia (\textit{Power Phase Offset}): diferencia angular
+            entre el inicio de la fase de potencia de cada pierna. Valores elevados pueden
+            indicar asimetrías en el patrón de pedaleo.
+
+      \item Variabilidad cinemática: se define como la desviación estándar de ángulos
+            articulares clave (ej. extensión de rodilla, flexión de cadera) durante
+            múltiples ciclos de pedaleo. Una menor variabilidad sugiere un movimiento más
+            estable, eficiente y con menor riesgo de lesiones por sobrecarga.
 \end{itemize}
 
 \subsection{Métricas subjetivas}
 \label{ssec:metricas_subjetivas}
 
 % Tono: Presente (definiciones).
-Las métricas subjetivas cuantifican la percepción del ciclista, lo cual es fundamental para validar el confort.
+Las métricas subjetivas cuantifican la percepción del ciclista, lo que es
+fundamental para validar el confort.
 
 \begin{itemize}
-    \item Percepción del esfuerzo (RPE, \textit{Rating of Perceived Exertion}): se utiliza la escala de Borg de 6 a 20. Se solicita al ciclista que valore su esfuerzo percibido en condiciones controladas (misma potencia y duración) antes y después del ajuste.
-    \item Escalas de confort/molestia: un reporte cualitativo o en escala de 1 a 10 sobre la presencia de molestias en zonas específicas (rodillas, espalda baja, hombros, manos).
+      \item Percepción del esfuerzo (RPE, \textit{Rating of Perceived Exertion}): se
+            utiliza la escala de Borg de 6 a 20. Se solicita al ciclista que valore su
+            esfuerzo percibido en condiciones controladas (misma potencia y duración) antes
+            y después del ajuste.
+      \item Escalas de confort/molestia: un reporte cualitativo o en escala de 1 a 10 sobre
+            la presencia de molestias en zonas específicas (rodillas, espalda baja,
+            hombros, manos).
 \end{itemize}
 
 % Tono: Presente (descripción de la tabla).
-En la tabla \ref{tab:metricas_definicion} se resumen las métricas utilizadas para el proceso de validación.
+En la tabla \ref{tab:metricas_definicion} se resumen las métricas utilizadas
+para el proceso de validación.
 
 % ----- Placeholder: Tabla Métricas -----
 \begin{table}[htbp]
-    \caption{Tabla de definición de métricas de evaluación.}
-    \label{tab:metricas_definicion}
-    \centering
-    \small
-    \begin{tabular}{p{2.5cm}p{3.5cm}p{5.5cm}p{2cm}}
-        \toprule
-        \textbf{Tipo} & \textbf{Métrica} & \textbf{Definición} & \textbf{Unidad} \\
-        \midrule
-        Objetiva & FC (eficiencia) & FC media en zonas de potencia controladas & PPM \\
-        Objetiva & Potencia & Potencia media/normalizada en zona FTP & W \\
-        Objetiva & Cadencia & Frecuencia de pedaleo media & RPM \\
-        Objetiva & Velocidad & Velocidad en condiciones controladas & km/h \\
-        Objetiva & Balance L/R & Distribución de potencia entre piernas & \% \\
-        Objetiva & Fase de potencia & Rango angular de aplicación de potencia & Grados (º) \\
-        Objetiva & Desfase de fase & Diferencia angular entre piernas & Grados (º) \\
-        Objetiva & Variabilidad cinemática & Desv. estándar de ángulos articulares & Grados (º) \\
-        \midrule
-        Subjetiva & RPE & Escala de Borg (6--20) & Adimensional \\
-        Subjetiva & Confort & Escala de dolor (0--10) & Adimensional \\
-        \bottomrule
-    \end{tabular}
+      \caption{Tabla de definición de métricas de evaluación.}
+      \label{tab:metricas_definicion}
+      \centering
+      \small
+      \begin{tabular}{p{2cm}p{3cm}p{6cm}p{1.8cm}}
+            \toprule
+            \textbf{Tipo} & \textbf{Métrica}        & \textbf{Definición}                       & \textbf{Unidad} \\
+            \midrule
+            Objetiva      & FC (eficiencia)         & FC media en zonas de potencia controladas & PPM             \\
+            Objetiva      & Potencia                & Potencia media/normalizada en zona FTP    & W               \\
+            Objetiva      & Cadencia                & Frecuencia de pedaleo media               & RPM             \\
+            Objetiva      & Velocidad               & Velocidad en condiciones controladas      & km/h            \\
+            Objetiva      & Balance L/R             & Distribución de potencia entre piernas    & \%              \\
+            Objetiva      & Fase de potencia        & Rango angular de aplicación de potencia   & Grados          \\
+            Objetiva      & Desfase de fase         & Diferencia angular entre piernas          & Grados          \\
+            Objetiva      & Variabilidad cinemática & Desv. estándar de ángulos articulares    & Grados          \\
+            \midrule
+            Subjetiva     & RPE                     & Escala de Borg (6--20)                    & Adim.           \\
+            Subjetiva     & Confort                 & Escala de dolor (0--10)                   & Adim.           \\
+            \bottomrule
+      \end{tabular}
 \end{table}
 % ---------------------------------------
 
