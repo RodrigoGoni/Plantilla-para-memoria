@@ -3,108 +3,261 @@
 \label{Chapter1} % For referencing the chapter elsewhere, use \ref{Chapter1}
 \label{IntroGeneral}
 
-Este capítulo presenta una introducción general al trabajo. Primero, se expone el contexto y la problemática de la biomecánica en el ciclismo. A continuación, se analiza el estado del arte de las soluciones de ajuste, o \textit{bike fitting}, y sus limitaciones actuales. Se detalla la motivación y el propósito que impulsan el desarrollo de una nueva solución. Finalmente, se definen los objetivos específicos y el alcance del prototipo propuesto.
+Este capítulo presenta una introducción general al trabajo. Primero, se expone
+el contexto y la problemática de la biomecánica en el ciclismo. A continuación,
+se analiza el estado del arte de las soluciones de ajuste, o \textit{bike
+    fitting}, y sus limitaciones actuales. Se detalla la motivación y el propósito
+que impulsan el desarrollo de una nueva solución. Finalmente, se definen los
+objetivos específicos y el alcance del prototipo propuesto.
 
 %----------------------------------------------------------------------------------------
 
 \section{Contexto y problemática}
 \label{contexto}
 
-La biomecánica en el ciclismo es un factor fundamental para mejorar el rendimiento y prevenir lesiones. Su principio se basa en la adaptación de la bicicleta a las características físicas del ciclista. Un ajuste incorrecto no solo puede causar lesiones, sino también una disminución en la potencia de salida que puede alcanzar hasta un 20\%.
-En la figura \ref{fig:problemaAjuste} se ilustra esta problemática.
-
-Sin embargo, el acceso a un análisis biomecánico profesional presenta barreras significativas. Las soluciones actuales suelen ser costosas, tienen baja disponibilidad y exigen visitas a laboratorios especializados.
+La biomecánica en el ciclismo es un factor fundamental para mejorar el
+rendimiento y prevenir lesiones \citep{review2019cycling}. Su principio se basa en la adaptación de la
+bicicleta a las características físicas del ciclista. Un ajuste incorrecto no
+solo puede causar lesiones, sino también una disminución en la potencia de
+salida que puede alcanzar hasta un 20\% \citep{power:Wilson2020}. En la figura \ref{fig:problemaAjuste}
+se ilustra esta problemática.
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[width=0.8\textwidth]{./Figures/problema_ajuste.jpg}
-\caption{Ilustración de la problemática de un mal ajuste biomecánico.}
-\label{fig:problemaAjuste}
+    \centering
+    \includegraphics[width=0.8\textwidth]{./Figures/problema_ajuste.jpg}
+    \caption{Ilustración de la problemática de un mal ajuste biomecánico.}
+    \label{fig:problemaAjuste}
 \end{figure}
+
+Sin embargo, el acceso a un análisis biomecánico profesional presenta barreras
+significativas. Las soluciones actuales suelen ser costosas, tienen baja
+disponibilidad y exigen visitas a laboratorios especializados \citep{complejidad:Wilson2020}.
+
+
 
 %----------------------------------------------------------------------------------------
 
 \section{Estado del arte}
 \label{estadodelarte}
 
-El \textit{bike fitting}, o ajuste biomecánico de la bicicleta, ha transitado desde un proceso artesanal basado en la goniometría estática y la experiencia subjetiva, hacia una ciencia de datos multimodal y de alta precisión. Las soluciones convencionales, basadas en un análisis estático y puntual, dependen en gran medida de la experiencia del biomecánico. La recomendación de repetir el ajuste anualmente, sumada al alto costo y la escasa disponibilidad, provoca que la mayoría de los ciclistas no mantengan una configuración óptima.
+El \textit{bike fitting}, o ajuste biomecánico de la bicicleta, ha transitado
+desde un proceso artesanal basado en la goniometría estática y la experiencia
+subjetiva, hacia una ciencia de datos multimodal y de alta precisión \citep{pubmed:staticvsdynamic}. Las
+soluciones convencionales, basadas en un análisis estático y puntual, dependen
+en gran medida de la experiencia del biomecánico. La recomendación de repetir
+el ajuste anualmente, sumada al alto costo y la escasa disponibilidad, provoca
+que la mayoría de los ciclistas no mantengan una configuración óptima.
 
-Los sistemas profesionales de laboratorio, como el que se observa en la figura \ref{fig:modernBikeFitting}, ejemplifican este enfoque. El estado del arte actual ya no se define por una única tecnología, sino por la convergencia e integración de múltiples flujos de datos. Este análisis sintetiza el panorama de las soluciones de vanguardia, que se pueden agrupar en cuatro pilares tecnológicos principales que definen la práctica avanzada.
+Los sistemas profesionales de laboratorio, como el que se observa en la figura
+\ref{fig:modernBikeFitting}, ejemplifican este enfoque. El estado del arte
+actual ya no se define por una única tecnología, sino por la convergencia e
+integración de múltiples flujos de datos. Este análisis sintetiza el panorama
+de las soluciones de vanguardia, que se pueden agrupar en cuatro pilares
+tecnológicos principales que definen la práctica avanzada.
 
 \begin{figure}[htbp]
- \centering
- \includegraphics[width=0.7\textwidth]{./Figures/modern_bikefitting.jpeg}
- \caption{Ejemplo de un sistema profesional de análisis biomecánico en laboratorio.}
- \label{fig:modernBikeFitting}
+    \centering
+    \includegraphics[width=0.7\textwidth]{./Figures/modern_bikefitting.jpeg}
+    \caption{Ejemplo de un sistema profesional de análisis biomecánico en laboratorio.}
+    \label{fig:modernBikeFitting}
 \end{figure}
 
-\subsection{El estándar cinemático: Captura de movimiento 3D y 4D}
+\subsection{El estándar cinemático: captura de movimiento 3D y 4D}
 
-La evolución fundamental en el \textit{bike fitting} ha sido el paso de las mediciones estáticas a las dinámicas \citep{pubmed:staticvsdynamic}. Los métodos tradicionales, que emplean goniómetros manuales o análisis de vídeo en 2D con el ciclista detenido, han demostrado ser insuficientes. Estos métodos no logran capturar la biomecánica real del ciclista bajo carga; es decir, mientras pedalea activamente \citep{herrero:retul}.
+La evolución fundamental en el \textit{bike fitting} ha sido el paso de las
+mediciones estáticas a las dinámicas. Los
+métodos tradicionales, que emplean goniómetros manuales o análisis de vídeo en
+2D con el ciclista detenido, han demostrado ser insuficientes \citep{pubmed:staticvsdynamic}. Estos métodos no
+logran capturar la biomecánica real del ciclista bajo carga, es decir, mientras
+pedalea activamente \citep{herrero:retul}.
 
-El ajuste dinámico tridimensional (3D) se considera el estándar que ofrece las mayores garantías. Sistemas como Retül o Vicon se han establecido como referentes y utilizan múltiples cámaras infrarrojas para rastrear marcadores en puntos anatómicos clave en tiempo real. Esto permite un análisis preciso del movimiento en los tres planos del espacio (sagital, frontal, transversal), lo que proporciona una imagen completa de la cinemática del ciclista que es imposible de obtener con métodos más simples \citep{herrero:retul}.
+El ajuste dinámico tridimensional (3D) se considera el estándar que ofrece las
+mayores garantías. Sistemas como Retül o Vicon \citep{herrero:retul, Vicon2025} se han establecido como
+referentes y utilizan múltiples cámaras infrarrojas para rastrear marcadores en
+puntos anatómicos clave en tiempo real. Esto permite un análisis preciso del
+movimiento en los tres planos del espacio (sagital, frontal, transversal), lo
+que proporciona una imagen completa de la cinemática del ciclista que es
+imposible de obtener con métodos más simples \citep{herrero:retul}.
 
-La superioridad del 3D no es meramente cualitativa; ha sido cuantificada rigurosamente. Un estudio fundamental de Fonda, Sarabon y Li (2013) comparó directamente los métodos cinemáticos. El hallazgo clave fue que, en comparación con el estándar 3D, el análisis 2D subestima de forma estadísticamente significativa el ángulo de la articulación de la rodilla. Esta subestimación sistemática es un error inherente a la proyección de un movimiento tridimensional en un plano bidimensional. El estudio determinó la necesidad de añadir un factor de corrección específico de 2.2° al valor 2D para aproximar el valor real 3D \citep{fonda2013validity}. Esto subraya la imprecisión inherente de los métodos 2D para una verdadera optimización biomecánica.
+La superioridad del 3D no es meramente cualitativa, ha sido cuantificada
+rigurosamente. Un estudio fundamental de Fonda, Sarabon y Li \citep{fonda2013validity} comparó
+directamente los métodos cinemáticos. El hallazgo clave fue que, en comparación
+con el estándar 3D, el análisis 2D subestima de forma estadísticamente
+significativa el ángulo de la articulación de la rodilla. Esta subestimación
+sistemática es un error inherente a la proyección de un movimiento
+tridimensional en un plano bidimensional. El estudio determinó la necesidad de
+añadir un factor de corrección específico de 2,2° al valor 2D para aproximar el
+valor real 3D \citep{fonda2013validity}. Esto subraya la imprecisión inherente
+de los métodos 2D para una verdadera optimización biomecánica.
 
-El estado del arte ha avanzado más allá de la simple dicotomía estático vs. dinámico. El análisis no solo debe ser dinámico, sino también funcional; es decir, realizado bajo cargas de trabajo (potencia) relevantes. Una revisión sistemática de 2019 sobre la biomecánica del ciclismo proporciona una visión crítica: la cinemática del ciclista se ve influenciada significativamente por la carga de trabajo. A medida que aumenta la potencia, los ciclistas exhiben cinemáticas compensatorias para mantener la producción de fuerza. Por lo tanto, un ajuste realizado a baja intensidad puede ser biomecánicamente inválido o subóptimo para las condiciones de competición del ciclista. La revisión establece rangos óptimos para el Ángulo de Flexión de Rodilla (KFA) medido dinámicamente, que se reduce de 33-43° a baja intensidad, a un rango de 30-40° a alta intensidad \citep{review2019cycling}.
+El estado del arte ha avanzado más allá de la simple dicotomía estático vs.
+dinámico. El análisis no solo debe ser dinámico, sino también funcional, es
+decir, realizado bajo cargas de trabajo (potencia) relevantes. Una revisión
+sistemática de 2019 \citep{review2019cycling} sobre la biomecánica del ciclismo proporciona una visión
+crítica: la cinemática del ciclista se ve influenciada significativamente por
+la carga de trabajo. A medida que aumenta la potencia, los ciclistas exhiben
+cinemáticas compensatorias para mantener la producción de fuerza. Por lo tanto,
+un ajuste realizado a baja intensidad puede ser biomecánicamente inválido o
+subóptimo para las condiciones de competición del ciclista. La revisión
+establece rangos óptimos para el Ángulo de Flexión de Rodilla (KFA) medido
+dinámicamente, que se reduce de 33-43° a baja intensidad, a un rango de 30-40°
+a alta intensidad \citep{review2019cycling}.
 
-\subsection{Cuantificación de la interfaz: Mapeo avanzado de presión}
+\subsection{Cuantificación de la interfaz: mapeo avanzado de presión}
 
-Si bien la cinemática 3D describe cómo se mueve el cuerpo del ciclista en el espacio, no puede describir cómo el ciclista interactúa con la bicicleta. El mapeo avanzado de presión es la tecnología de vanguardia diseñada para cuantificar la estabilidad y la distribución de la fuerza en los tres puntos de contacto principales: sillín, pies y manillar.
+Si bien la cinemática 3D describe cómo se mueve el cuerpo del ciclista en el
+espacio, no puede describir cómo el ciclista interactúa con la bicicleta. El
+mapeo avanzado de presión \citep{IACenter2025} es la tecnología de vanguardia diseñada para
+cuantificar la estabilidad y la distribución de la fuerza en los tres puntos de
+contacto principales: sillín, pies y manillar.
 
-Empresas como Gebiomized lideran este dominio con alfombrillas de sensores flexibles y de alta resolución que proporcionan información previamente inconmensurable. La aplicación más crítica es el análisis del sillín. Más allá de la simple comodidad subjetiva, el sistema mide la distribución de la presión (media y máxima) y las asimetrías izquierda/derecha. Sin embargo, la métrica más importante generada es el Centro de Movimiento y el Patrón de Rastreo Pélvico (\textit{Pelvic Tracking}). El sistema mapea cómo se mueve el centro de presión del ciclista sobre el sillín mientras pedalea \citep{gebiomized:web}.
+Empresas como Gebiomized\citep{gebiomized:web} lideran este dominio con alfombrillas de sensores
+flexibles y de alta resolución que proporcionan información previamente
+inconmensurable. La aplicación más crítica es el análisis del sillín. Más allá
+de la simple comodidad subjetiva, el sistema mide la distribución de la presión
+(media y máxima) y las asimetrías izquierda/derecha. Sin embargo, la métrica
+más importante generada es el Centro de Movimiento y el Patrón de Rastreo
+Pélvico (\textit{Pelvic Tracking}). El sistema mapea cómo se mueve el centro de
+presión del ciclista sobre el sillín mientras pedalea \citep{gebiomized:web}.
 
-Esta tecnología proporciona el vínculo causal crucial entre la cinemática y la estabilidad de la interfaz. A menudo, un movimiento cinemático aberrante de la rodilla (detectado por un sistema 3D) no es un problema de la rodilla en sí. Es un síntoma. La causa raíz suele ser la inestabilidad pélvica. La tecnología de mapeo de presión es la única herramienta que puede diagnosticar y cuantificar objetivamente esta inestabilidad pélvica. De manera similar, esta tecnología se aplica a las plantillas (para analizar la transferencia de potencia y estabilizar el pie como una palanca rígida \citep{pruitt:trainingpeaks}) y al \textit{cockpit} (para mitigar la fatiga y las neuropatías en las extremidades superiores) \citep{gebiomized:web}.
+Esta tecnología proporciona el vínculo causal crucial entre la cinemática y la
+estabilidad de la interfaz. A menudo, un movimiento cinemático aberrante de la
+rodilla (detectado por un sistema 3D) no es un problema de la rodilla en sí. Es
+un síntoma. La causa raíz suele ser la inestabilidad pélvica. La tecnología de
+mapeo de presión es la única herramienta que puede diagnosticar y cuantificar
+objetivamente esta inestabilidad pélvica. De manera similar, esta tecnología se
+aplica a las plantillas (para analizar la transferencia de potencia y
+estabilizar el pie como una palanca rígida \citep{pruitt:trainingpeaks}) y al
+\textit{cockpit} (para mitigar la fatiga y las neuropatías en las extremidades
+superiores) \citep{gebiomized:web}.
 
 \subsection{El imperativo aerodinámico y la democratización del análisis}
 
-Para el ciclismo de rendimiento, la biomecánica es solo la mitad de la ecuación. Existe un conflicto central: la posición más aerodinámica (típicamente más baja y estrecha) a menudo restringe la biomecánica de la producción de potencia y compromete el confort \citep{pruitt:trainingpeaks}. El estado del arte busca cuantificar y optimizar este equilibrio.
+Para el ciclismo de rendimiento, la biomecánica es solo la mitad de la
+ecuación. Existe un conflicto central: la posición más aerodinámica
+(típicamente más baja y estrecha) a menudo restringe la biomecánica de la
+producción de potencia y compromete el confort \citep{pruitt:trainingpeaks}. El
+estado del arte busca cuantificar y optimizar este equilibrio.
 
-Históricamente, esto requería costosas pruebas en túneles de viento físicos \citep{poc:cfd}. La primera evolución fue la Dinámica de Fluidos Computacional (CFD) \citep{cfd:recumbent}. Las soluciones más recientes integran CFD con Inteligencia Artificial (IA). Plataformas emergentes como AiRO se describen como el primer sistema de \textit{bike-fit} modelado por CFD e impulsado por IA. El sistema genera un modelo 3D del ciclista y ejecuta un análisis CFD en la nube para calcular la resistencia aerodinámica (CdA) en minutos \citep{airo:launch}. Un enfoque alternativo o complementario son los sensores aerodinámicos portátiles en tiempo real, como el Notio Aerometer. Este dispositivo utiliza un tubo de Pitot, GPS y una conexión a un medidor de potencia para calcular el CdA de referencia del ciclista en condiciones del mundo real \citep{notio:web}.
+Históricamente, esto requería costosas pruebas en túneles de viento físicos
+\citep{poc:cfd}. La primera evolución fue la Dinámica de Fluidos Computacional
+(CFD) \citep{cfd:recumbent, vanDrunen:aero}. Las soluciones más recientes integran CFD con
+Inteligencia Artificial (IA). Plataformas emergentes como AiRO\citep{airo:launch} se describen
+como el primer sistema de \textit{bike-fit} modelado por CFD e impulsado por
+IA. El sistema genera un modelo 3D del ciclista y ejecuta un análisis CFD en la
+nube para calcular la resistencia aerodinámica (CdA) en minutos
+\citep{airo:launch}. Un enfoque alternativo o complementario son los sensores
+aerodinámicos portátiles en tiempo real, como el Notio Aerometer. Este
+dispositivo utiliza un tubo de Pitot, GPS y una conexión a un medidor de
+potencia para calcular el CdA de referencia del ciclista en condiciones del
+mundo real \citep{notio:web, gtn:notio_experiment}.
 
-Paralelamente a estos sistemas de alta especialización, ha surgido una tendencia de democratización del \textit{bikefitting} mediante aplicaciones de \textit{smartphone}. Plataformas como MyVeloFit \citep{myvelofit:online} y Bike Fast Fit \citep{bikefastfit:web} ofrecen análisis biomecánicos por una fracción del costo de un \textit{fit} de laboratorio. Su innovación más significativa (particularmente MyVeloFit) es la integración de evaluaciones de movilidad funcional. El proceso comienza con el usuario que realiza una serie de evaluaciones de movilidad. La IA personaliza la ventana de ajuste objetivo basándose en los resultados de la flexibilidad individual del usuario \citep{myvelofit:online}.
+Paralelamente a estos sistemas de alta especialización, ha surgido una
+tendencia de democratización del \textit{bikefitting} mediante aplicaciones de
+\textit{smartphone}. Plataformas como MyVeloFit \citep{myvelofit:online} y Bike
+Fast Fit \citep{bikefastfit:web} ofrecen análisis biomecánicos por una fracción
+del costo de un \textit{fit} de laboratorio. Su innovación más significativa
+(particularmente MyVeloFit) es la integración de evaluaciones de movilidad
+funcional \citep{delphi:consensus}. El proceso comienza con el usuario que realiza una serie de
+evaluaciones de movilidad. La IA personaliza la ventana de ajuste objetivo
+basándose en los resultados de la flexibilidad individual del usuario
+\citep{myvelofit:online}.
 
-Esto, sin embargo, presenta un conflicto académico fundamental. En esencia, estas aplicaciones siguen siendo sistemas de cinemática 2D. Esto las pone en contradicción directa con los hallazgos (como los de Fonda et al. \citep{fonda2013validity}) que establecieron que el 2D subestima sistemáticamente los ángulos clave. La pregunta crítica, que sigue siendo un área clave para la investigación futura, es si los algoritmos de IA pueden compensar adecuadamente los errores inherentes de perspectiva y paralaje de una captura 2D.
+Esto, sin embargo, presenta un conflicto académico fundamental. En esencia,
+estas aplicaciones siguen siendo sistemas de cinemática 2D. Esto las pone en
+contradicción directa con los hallazgos (como los de Fonda et al.
+\citep{fonda2013validity}) que establecieron que el 2D subestima
+sistemáticamente los ángulos clave. La pregunta crítica que sigue siendo un
+área clave para la investigación futura, es si los algoritmos de IA pueden
+compensar adecuadamente los errores inherentes de perspectiva y paralaje de una
+captura 2D.
 
 \subsection{Síntesis y limitaciones del estado del arte}
 
-El análisis del estado del arte revela una clara trayectoria: una evolución desde la medición de ángulos estáticos hacia la creación de un perfil dinámico y multimodal del sistema ciclista-bicicleta. El ajuste óptimo ya no es un conjunto estático de coordenadas, sino un equilibrio dinámico validado a través de múltiples capas de datos.
+El análisis del estado del arte revela una clara trayectoria: una evolución
+desde la medición de ángulos estáticos hacia la creación de un perfil dinámico
+y multimodal del sistema ciclista-bicicleta. El ajuste óptimo ya no es un
+conjunto estático de coordenadas, sino un equilibrio dinámico validado a través
+de múltiples capas de datos.
 
-El desafío principal en este campo es encontrar el balance óptimo entre la posición que maximiza la velocidad y aquella que minimiza el esfuerzo y el riesgo de lesiones. Frecuentemente, la postura más aerodinámica no es la más sostenible a largo plazo. El papel del profesional ha pasado de ser un técnico a ser un integrador de datos, que debe sopesar métricas a menudo contradictorias.
+El desafío principal en este campo es encontrar el balance óptimo entre la
+posición que maximiza la velocidad y aquella que minimiza el esfuerzo y el
+riesgo de lesiones. Frecuentemente, la postura más aerodinámica no es la más
+sostenible a largo plazo. El papel del profesional ha pasado de ser un técnico
+a ser un integrador de datos, que debe sopesar métricas a menudo
+contradictorias.
 
-Las limitaciones de las soluciones de vanguardia (sistemas 3D, mapeo de presión, CFD) son su alto costo y su dependencia de un entorno de laboratorio. Esto define el enfoque de las soluciones tradicionales: un análisis estático y puntual. Esta aproximación ha impedido una verdadera optimización biomecánica continua para el ciclista, lo cual define la problemática central que motiva el presente trabajo.
+Las limitaciones de las soluciones de vanguardia (sistemas 3D, mapeo de
+presión, CFD) son su alto costo y su dependencia de un entorno de laboratorio.
+Esto define el enfoque de las soluciones tradicionales: un análisis estático y
+puntual. Esta aproximación ha impedido una verdadera optimización biomecánica
+continua para el ciclista,lo que define la problemática central que motiva el
+presente trabajo.
 
 %----------------------------------------------------------------------------------------
 
 \section{Motivación y propósito}
 \label{mot}
 
-La motivación de este trabajo surge de la necesidad de superar las limitaciones del estado del arte, detalladas en la sección \ref{estadodelarte}. El alto costo, la baja disponibilidad y el enfoque estático de las soluciones tradicionales han impedido una verdadera optimización biomecánica continua para el ciclista.
+La motivación de este trabajo surge de la necesidad de superar las limitaciones
+del estado del arte, detalladas en la sección \ref{estadodelarte}. El alto
+costo, la baja disponibilidad y el enfoque estático de las soluciones
+tradicionales han impedido una verdadera optimización biomecánica continua para
+el ciclista.
 
-En este contexto, se reconoce que el ajuste debe ser un proceso dinámico. La necesidad de un ajuste frecuente obedece a que la práctica constante del deporte genera adaptaciones fisiológicas en el ciclista. Estas adaptaciones incluyen una mejora en la capacidad de elongación y flexibilidad muscular, lo que modifica los rangos de movimiento óptimos para el pedaleo. Por consiguiente, la configuración ideal de la bicicleta evoluciona con el progreso físico del deportista y exige una reevaluación periódica.
+En este contexto, se reconoce que el ajuste debe ser un proceso dinámico \citep{pubmed:staticvsdynamic, fonda2013validity}. La
+necesidad de un ajuste frecuente obedece a que la práctica constante del
+deporte genera adaptaciones fisiológicas en el ciclista. Estas adaptaciones
+incluyen una mejora en la capacidad de elongación y flexibilidad muscular, lo
+que modifica los rangos de movimiento óptimos para el pedaleo. Por
+consiguiente, la configuración ideal de la bicicleta evoluciona con el progreso
+físico del deportista y exige una reevaluación periódica.
 
-El valor fundamental de la solución propuesta radica en la capacidad de ofrecer al ciclista la realización de ajustes frecuentes y a un costo significativamente menor que las alternativas tradicionales. Esta aproximación permite una mejora continua del rendimiento y una gestión activa de la prevención de lesiones al considerar la evolución de las capacidades físicas del deportista.
+El valor fundamental de la solución propuesta radica en la capacidad de ofrecer
+al ciclista la realización de ajustes frecuentes y a un costo
+significativamente menor que las alternativas tradicionales. Esta aproximación
+permite una mejora continua del rendimiento y una gestión activa de la
+prevención de lesiones al considerar la evolución de las capacidades físicas
+del deportista.
 
-El propósito de este trabajo es desarrollar un sistema inteligente y personalizado que enfrente el desafío de la optimización multiobjetivo. El sistema integra la detección de pose mediante redes neuronales y el análisis exhaustivo de datos provenientes de sensores de ciclismo. Se buscó optimizar de forma integral los parámetros biomecánicos de la bicicleta. En esencia, se persiguió maximizar la potencia y eficiencia del pedaleo, minimizar el riesgo de lesiones, y equilibrar estos factores con la aerodinámica para alcanzar la máxima velocidad posible.
+El propósito de este trabajo es desarrollar un sistema inteligente y
+personalizado que enfrente el desafío de la optimización multiobjetivo. El
+sistema integra la detección de pose mediante redes neuronales y el análisis
+exhaustivo de datos provenientes de sensores de ciclismo. Se buscó optimizar de
+forma integral los parámetros biomecánicos de la bicicleta. En esencia, se
+persiguió maximizar la potencia y eficiencia del pedaleo, minimizar el riesgo
+de lesiones, y equilibrar estos factores con la aerodinámica para alcanzar la
+máxima velocidad posible.
 %----------------------------------------------------------------------------------------
 
 \section{Objetivos y alcance}
 \label{obj}
 
-El objetivo principal de este trabajo fue desarrollar un prototipo de un sistema inteligente que optimice los parámetros biomecánicos de la bicicleta. Se buscó maximizar la potencia y eficiencia del pedaleo, minimizar el riesgo de lesiones y equilibrar estos factores con la aerodinámica.
+El objetivo principal de este trabajo fue desarrollar un prototipo de un
+sistema inteligente que optimice los parámetros biomecánicos de la bicicleta.
+Se buscó maximizar la potencia y eficiencia del pedaleo, minimizar el riesgo de
+lesiones y equilibrar estos factores con la aerodinámica.
 
 El alcance del trabajo incluyó:
 
 \begin{itemize}
-\item El desarrollo de un sistema de optimización personalizado que proporciona recomendaciones para el ajuste biomecánico de la bicicleta.
-\item Un ciclo continuo de análisis y retroalimentación que incluye la captura de datos (video y sensores), el análisis de movimiento mediante estimación de pose 2D, y un modelo biomecánico.
-\item Un algoritmo de optimización integral para lograr el equilibrio entre ajuste biomecánico, aerodinámica y prevención de lesiones.
-\item La generación de un reporte con recomendaciones claras para que el usuario pueda ajustar la bicicleta.
+    \item El desarrollo de un sistema de optimización personalizado que proporciona
+          recomendaciones para el ajuste biomecánico de la bicicleta.
+    \item Un ciclo continuo de análisis y retroalimentación que incluye la captura de
+          datos (video y sensores), el análisis de movimiento mediante estimación de pose
+          2D, y un modelo biomecánico.
+    \item Un algoritmo de optimización integral para lograr el equilibrio entre ajuste
+          biomecánico, aerodinámica y prevención de lesiones.
+    \item La generación de un reporte con recomendaciones claras para que el usuario
+          pueda ajustar la bicicleta.
 \end{itemize}
 
 El presente trabajo no incluyó:
 \begin{itemize}
-\item El desarrollo de hardware personalizado para la captura de datos. Se utiliza la integración con sensores comerciales existentes.
-\item El entrenamiento de la red neuronal de detección de pose desde cero. Se espera utilizar o adaptar redes neuronales preexistentes.
-\item La simulación de factores externos complejos, como condiciones climáticas extremas.
+    \item El desarrollo de hardware personalizado para la captura de datos. Se utiliza la
+          integración con sensores comerciales existentes.
+    \item El entrenamiento de la red neuronal de detección de pose desde cero. Se espera
+          utilizar o adaptar redes neuronales preexistentes.
+    \item La simulación de factores externos complejos, como condiciones climáticas
+          extremas.
 \end{itemize}
