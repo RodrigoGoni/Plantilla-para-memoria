@@ -1,8 +1,12 @@
-\chapter{Diseño e implementación} % Main chapter title
+\chapter{Diseño e implementación}
+\label{Chapter3}
 
-\label{Chapter3} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
-
-Todos los capítulos deben comenzar con un breve párrafo introductorio que indique cuál es el contenido que se encontrará al leerlo.  La redacción sobre el contenido de la memoria debe hacerse en presente y todo lo referido al proyecto en pasado, siempre de modo impersonal.
+En este capítulo se presenta el diseño e implementación del sistema de
+optimización biomecánica desarrollado en este trabajo. Se describe la
+metodología empleada para estructurar el trabajo, la arquitectura del sistema
+propuesto y los módulos que lo componen. La exposición se organiza de manera
+secuencial, desde la adquisición de datos hasta la generación del reporte final
+de recomendaciones.
 
 %----------------------------------------------------------------------------------------
 %	METODOLOGÍA
@@ -11,49 +15,481 @@ Todos los capítulos deben comenzar con un breve párrafo introductorio que indi
 \label{sec:metodologia}
 
 % Tono: Pasado (describe lo que SE HIZO en el trabajo).
-Para la gestión y ejecución de este trabajo, se adaptó la metodología CRISP-DM \citep{IBM_SPSS_CRISP_DM}
-(\textit{Cross-Industry Standard Process for Data Mining}). Esta adaptación fue
-necesaria para alinear las fases estándar de un proyecto de minería de datos
-con los objetivos específicos del trabajo de optimización biomecánica
-asistida por inteligencia artificial, como se describe en la sección 8 del
-documento de planificación \citep{RGv5Goni}.
+Para la gestión y ejecución de este trabajo, se adaptó la metodología CRISP-DM
+\citep{IBM_SPSS_CRISP_DM} (\textit{Cross-Industry Standard Process for Data
+  Mining}). Esta adaptación fue necesaria para alinear las fases estándar de un
+trabajo de minería de datos con los objetivos específicos del trabajo de
+optimización biomecánica asistida por inteligencia artificial, como se describe
+en la sección 8 del documento de planificación \citep{RGv5Goni}.
 
 % Tono: Pasado (el trabajo de adaptación).
-El modelo se reestructuró en las siguientes fases principales, ajustadas al
-contexto del trabajo:
+El modelo se reestructuró en las siguientes fases principales, que fueron
+ajustadas al contexto del trabajo:
 
 \begin{itemize}
-    \item Comprensión del negocio y del problema biomecánico.
-    \item Comprensión y adquisición de los datos (video, sensores de rendimiento y datos
-          antropométricos).
-    \item Preparación y preprocesamiento de los datos, que incluyó la extracción de pose y
-          el filtrado de señales.
-    \item Modelado y simulación biomecánica y aerodinámica.
-    \item Evaluación de las soluciones generadas por el optimizador (análisis del frente
-          de Pareto).
-    \item Despliegue, que fue materializado en la generación del reporte de recomendaciones para
-          el ciclista.
+  \item Comprensión del negocio y del problema biomecánico.
+  \item Comprensión y adquisición de los datos (video, sensores de rendimiento y datos
+        antropométricos).
+  \item Preparación y preprocesamiento de los datos, que incluyó la extracción de pose
+        y el filtrado de señales.
+  \item Modelado y simulación biomecánica y aerodinámica.
+  \item Evaluación de las soluciones generadas por el optimizador (análisis del frente
+        de Pareto).
+  \item Despliegue, que fue materializado en la generación del reporte de
+        recomendaciones para el ciclista.
 \end{itemize}
 
 La figura \ref{fig:crisp_dm_flujo} muestra el diagrama de flujo de la
 metodología implementada.
 
 \begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{Imagenes/crisp_dm.png} % Descomentar para usar la imagen real
+  \centering
+  % \includegraphics[width=0.8\textwidth]{Imagenes/crisp_dm.png} % Descomentar para usar la imagen real
 
-    % --- Inicio: Placeholder de la figura ---
-    % Se utiliza \framebox para un placeholder robusto.
-    \includegraphics[width=0.7\textwidth]{./Figures/crispdm.pdf}
-    % --- Fin: Placeholder de la figura ---
+  % --- Inicio: Placeholder de la figura ---
+  % Se utiliza \framebox para un placeholder robusto.
+  \includegraphics[width=0.7\textwidth]{./Figures/crispdm.pdf}
+  % --- Fin: Placeholder de la figura ---
 
-    \caption{Diagrama de flujo de la metodología CRISP-DM adaptada para el trabajo.}
-    \label{fig:crisp_dm_flujo}
+  \caption{Diagrama de flujo de la metodología CRISP-DM adaptada para el trabajo.}
+  \label{fig:crisp_dm_flujo}
+\end{figure}
+%----------------------------------------------------------------------------------------
+
+\section{Arquitectura del \textit{pipeline}}
+\label{sec:arquitectura}
+
+En esta sección se detalla el diseño arquitectónico del sistema desarrollado.
+La solución fue estructurada como un flujo de trabajo lineal con
+retroalimentación de control cerrado, concebido para transformar flujos de
+datos estocásticos y asíncronos provenientes de video y sensores en
+recomendaciones biomecánicas accionables y deterministas. La arquitectura
+modular permitió el desacoplamiento estricto de las capas de percepción,
+modelado físico y razonamiento algorítmico, lo que facilitó la actualización
+independiente de los modelos de redes neuronales o los parámetros del algoritmo
+genético sin comprometer la integridad operativa del sistema global.
+
+El flujo lógico de datos, conceptualizado en el diagrama de bloques de la
+Figura \ref{fig:arquitectura_sistema}, se organiza en cinco etapas secuenciales
+críticas que abordan desde la física de la adquisición de la señal hasta la
+convergencia matemática de la solución óptima:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/Arquitectura_Pipeline.pdf}
+  \caption{Diagrama en bloques detallado de la arquitectura del \textit{pipeline} y el flujo de datos multimodal.}
+  \label{fig:arquitectura_sistema}
 \end{figure}
 
+\begin{enumerate}
+  \item Entrada de datos (capa de adquisición): módulo de abstracción de hardware
+        encargado de la captura sincronizada de fuentes heterogéneas, que gestionó
+        \textit{buffers} circulares para video de alta velocidad y telemetría mediante 
+        protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (Bluetooth Low Energy) \citep{Gomez2012BLE}.
+  \item Procesamiento y análisis (capa de percepción): etapa de acondicionamiento de
+        señal donde se ejecutó la inferencia de la red neuronal de detección de pose,
+        se realizó la alineación temporal mediante correlación cruzada de señales y se
+        aplicó filtrado digital selectivo para la reconstrucción cinemática.
+  \item Modelado y simulación (capa física): instanciación del gemelo digital del
+        ciclista, resolución del problema de dinámica inversa plana y estimación del
+        ($C_d A$).
+  \item Optimización multi-objetivo (capa de razonamiento): núcleo algorítmico donde un
+        algoritmo genético exploró estocásticamente el espacio de configuraciones
+        geométricas para resolver el conflicto entre confort biomecánico, eficiencia de
+        potencia y resistencia aerodinámica.
+  \item Salida y retroalimentación (capa de interfaz): generación del frente de Pareto,
+        visualización sobre el flujo de video original y cierre del ciclo de control
+        tras la verificación del ajuste físico.
+\end{enumerate}
+
+Esta arquitectura fue diseñada para ejecutarse completamente en el borde, lo
+que permitió minimizar la latencia de inferencia y garantizar la privacidad de
+los datos biomecánicos del ciclista al mantener todo el procesamiento local sin
+necesidad de conexión a servicios externos.
+
+\subsection{Entrada de datos: adquisición multimodal}
+Este módulo actuó como la interfaz física con el entorno, lo que permitió
+recolectar datos de dominios temporales dispares: el dominio óptico (video) y
+el dominio de sensores inerciales/potencia. La sincronización de estos dominios
+fue el desafío fundamental de esta etapa.
+
+\subsubsection{Subsistema de video y restricciones ópticas}
+La captura de video es el sustrato fundamental para la reconstrucción
+cinemática 2D. A diferencia de la grabación convencional, este módulo impuso
+restricciones estrictas de hardware para garantizar la integridad de los mapas
+de calor generados por la red neuronal en etapas posteriores:
+
+\begin{itemize}
+  \item Velocidad de obturación: se impuso un tiempo de exposición máximo de $t_{exp}
+          \leq 1/500$ s. Esto fue crítico para eliminar el desenfoque de movimiento
+        (\textit{motion blur}) en los marcadores anatómicos (especialmente el maléolo
+        lateral \citep{Radiologia2013} y el quinto metatarso \citep{Wikipedia5Meta}), que alcanzaron velocidades angulares máximas
+        $\omega_{max}$ en los puntos muertos del ciclo de pedaleo. El desenfoque en
+        estas fases introdujo un error sistemático no gaussiano en la inferencia de la
+        posición articular.
+  \item Tasa de fotogramas: se requirió una frecuencia de muestreo mínima de $f_s \geq
+          60$ FPS para cumplir con el teorema de Nyquist-Shannon \citep{Nyquist1928} aplicado a la cinemática
+        del pedaleo, donde los armónicos de movimiento significativos se encuentran por
+        debajo de 15 Hz.
+  \item Normalización de entrada: la resolución de entrada se redimensionó
+        dinámicamente para coincidir con el tensor de entrada de la CNN, lo que utilizó
+        interpolación bicúbica para evitar artefactos de degradación de la señal
+        (\textit{aliasing}).
+\end{itemize}
+
+\subsubsection{Entorno de análisis y procesamiento de señales}
+El sistema se implementó sobre la plataforma GoldenCheetah \citep{goldencheetah_web}, 
+aprovechando su motor de ejecución de Python integrado como núcleo de procesamiento. 
+Esta arquitectura permitió la manipulación de datos de alto nivel, lo que superó las 
+limitaciones del procesamiento de tramas crudas.
+
+En lugar de calcular la potencia media $\bar{P}$ mediante diferencias de
+acumulados a nivel de byte, el sistema utilizó las estructuras de datos
+internas de GoldenCheetah, las cuales garantizaron la integridad y
+sincronización temporal de las muestras. La implementación se basó en dos
+pilares documentados en la API de GoldenCheetah:
+\begin{itemize}
+  \item Acceso a datos: recuperación de actividades y series temporales mediante
+        funciones nativas, lo que aseguró la coherencia de los datos independientemente
+        del protocolo de transmisión (ANT+ o BLE).
+  \item Procesadores personalizados: implementación de algoritmos definidos por el
+        usuario que operaron sobre la señal de potencia $P(t)$ ya depurada, lo que
+        permitió el cálculo de métricas derivadas complejas en un entorno interpretado
+        de Python.
+\end{itemize}
+
+\subsection{Procesamiento y análisis: reconstrucción digital}
+Este módulo transformó los datos brutos (imágenes y bytes) en señales
+biomecánicas estructuradas, limpias y sincronizadas.
+
+\subsubsection{Detección de pose neuronal}
+Se empleó una arquitectura de aprendizaje profundo para inferir la ubicación
+probabilística de 33 puntos clave del cuerpo. Tal como se detalló en la sección
+\ref{ssec:vision_pose} del marco teórico, se seleccionó el modelo 
+\textit{MediaPipe BlazePose} por su alineación con la tarea de seguimiento en 
+video y su topología de 33 puntos clave específicos para el análisis biomecánico 
+del ciclismo. Para adaptar la red de propósito general al contexto específico del 
+ciclismo, se implementó un filtro de Prior Cinemático.
+
+Dado que el ciclismo con calas automáticas constituye una cadena cinética
+cerrada (los pies están fijos a los pedales y describen una trayectoria
+circular fija), la longitud de los segmentos óseos debe permanecer invariante
+en el tiempo. El sistema penalizó y corrigió detecciones que violaron la
+antropometría del sujeto:
+\begin{equation}
+  |L_{seg}(t) - \mu_{L_{seg}}| > \epsilon \Rightarrow \text{Corrección por cinemática inversa}
+\end{equation}
+Donde $L_{seg}(t)$ es la longitud euclidiana del segmento en el instante $t$ y $\mu_{L_{seg}}$ es la longitud media calibrada.
+
+\subsubsection{Sincronización temporal (algoritmo de correlación de cadencia)}
+Un desafío arquitectónico mayor fue alinear el video (muestreado a 60-240 Hz)
+con la telemetría (muestreada a 4 Hz), ya que poseen relojes independientes y
+latencias de transmisión variables. El \textit{pipeline} implementó un
+algoritmo de alineación basado en la cadencia:
+\begin{enumerate}
+  \item Se extrajo una señal de ``cadencia visual'' ($\omega_{vis}$) al analizar la
+        periodicidad de la coordenada vertical de la rodilla ($y_{knee}$) mediante
+        Transformada de Fourier de Tiempo Corto (STFT).
+  \item Se obtuvo la señal de cadencia del sensor de potencia ($\omega_{sens}$).
+  \item Se calculó la correlación cruzada normalizada $R_{vs}(\tau)$ para encontrar el
+        desfase óptimo $\tau_{opt}$:
+\end{enumerate}
+\begin{equation}
+  \tau_{opt} = \arg \max_{\tau} \int_{-\infty}^{\infty} \omega_{vis}(t) \cdot \omega_{sens}(t+\tau) \, dt
+\end{equation}
+Esto permitió alinear el pico de fuerza aplicado en el pedal con el ángulo de la biela correspondiente con precisión de sub-fotograma.
+
+\subsection{Modelado y simulación: física computacional}
+En esta etapa se predijo el comportamiento del sistema ciclista-bicicleta bajo
+diferentes configuraciones geométricas sin necesidad de intervención física.
+
+\subsubsection{Estimación aerodinámica ($C_d A$)}
+El sistema estimó el Área Frontal Proyectada ($A_{proj}$) al utilizar una red
+de segmentación semántica sobre la vista lateral del ciclista. Aunque la vista
+lateral no capturó directamente el área frontal, se aplicaron modelos de
+regresión multivariable (basados en estudios de Bassett y Heil) que
+correlacionaron la pose sagital con el área frontal efectiva. El modelo
+consideró la altura del torso y el ángulo de apertura de la cadera:
+\begin{equation}
+  A_{proj} \approx \alpha \cdot H_{torso} \cdot \sin(\theta_{cadera}) + \beta \cdot m_{ciclista}^{0.425} + \gamma
+\end{equation}
+Esto permitió cuantificar el coste aerodinámico ($P_{aero} \propto v^3 \cdot A_{proj}$) de cambios posturales, como bajar la altura del manillar ($Stack$).
+
+\subsubsection{Dinámica inversa plana}
+Al combinar la cinemática filtrada y los vectores de fuerza derivados de la
+potencia (se asumió una descomposición de fuerza tangencial efectiva), se
+resolvieron las ecuaciones de Newton-Euler para calcular los momentos netos
+articulares ($M_{net}$) en tobillo, rodilla y cadera. Esto permitió identificar
+ineficiencias mecánicas, como momentos de flexión excesivos en la rodilla que
+no contribuyeron a la propulsión.
+
+\subsection{Optimización multi-objetivo: algoritmo genético}
+El núcleo decisional utilizó un algoritmo genético adaptado para resolver el
+Problema de Optimización Multiobjetivo. Se buscó encontrar el vector de
+configuración $\mathbf{x} = [h_{sillin}, x_{sillin}, h_{manillar},
+  x_{manillar}]$ que satisfizo simultáneamente objetivos conflictivos.
+
+\subsubsection{Funciones objetivo}
+El sistema minimizó tres funciones de coste ($J$):
+\begin{enumerate}
+  \item Minimizar disconfort ($J_{comfort}$): función de penalización cuadrática que se
+        disparó cuando los ángulos articulares $\theta_j$ (extensión de rodilla,
+        flexión de hombro, etc.) salieron de los rangos fisiológicos seguros
+        predefinidos en la literatura médica:
+        \begin{equation}
+          J_{comfort}(\mathbf{x}) = \sum_{j=1}^{N} w_j \cdot \max(0, \theta_j(\mathbf{x}) - \theta_{max}, \theta_{min} - \theta_j(\mathbf{x}))^2
+        \end{equation}
+  \item Maximizar eficiencia biomecánica ($J_{power}$): se buscó minimizar la integral
+        del momento articular absoluto necesario para producir una potencia objetivo,
+        lo que implicó una palanca más efectiva.
+  \item Minimizar resistencia aerodinámica ($J_{aero}$): minimización directa del $C_d
+          A$ estimado en la etapa anterior.
+\end{enumerate}
+
+\subsubsection{Configuración del algoritmo}
+Se empleó una población de $N=100$ individuos con codificación real. Se utilizó
+selección por torneo binario, cruzamiento simulado con probabilidad $p_c = 0.9$
+y mutación polinómica con probabilidad $p_m = 1/L$ (donde $L$ es el número de
+variables). El mecanismo de elitismo aseguró la preservación de las mejores
+soluciones del frente de Pareto a través de las generaciones.
+
+\subsection{Salida y retroalimentación}
+La etapa final sintetizó los resultados matemáticos para el usuario final (el
+biomecánico o el ciclista).
+\begin{itemize}
+  \item Análisis de Pareto: se presentaron soluciones categorizadas (ej. ``opción
+        confort'' vs ``opción aero'') extraídas del conjunto óptimo no dominado.
+  \item Visualización de resultados: se generó una representación gráfica del frente de
+        Pareto con las configuraciones óptimas, lo que permitió al usuario seleccionar
+        el ajuste que mejor se adaptó a sus objetivos biomecánicos y de rendimiento.
+\end{itemize}
+
 %----------------------------------------------------------------------------------------
-%	CONFIGURACIÓN DE CÓDIGO
+
+\section{Adquisición de datos}
+\label{sec:adquisicion}
+
+El módulo de adquisición de datos se diseñó para garantizar la integridad y la
+coherencia temporal de la información de entrada, un requisito crítico para la
+validez del análisis posterior. El sistema integró dos fuentes de información
+principales: la captura óptica y la telemetría de sensores.
+
+Para la captura óptica, se estableció un protocolo de grabación estandarizado.
+Se utilizó una cámara de alta resolución que fue ubicada en una posición
+lateral estática, ortogonal al plano sagital del ciclista. Esta disposición
+minimizó los errores de paralaje inherentes a la proyección 2D, una limitación
+que se discute en el capítulo \ref{Chapter2}. El sistema se configuró para
+capturar video a una tasa de cuadros constante, suficiente para evitar el
+desenfoque de movimiento durante el pedaleo a cadencias altas.
+
+Simultáneamente, se implementó la recolección de datos de rendimiento mediante
+el protocolo ANT+. Se desarrolló un \textit{script} de escucha que se conectó a
+los sensores presentes en el rodillo de entrenamiento inteligente y en la
+bicicleta. Las variables capturadas incluyeron:
+
+\begin{itemize}
+  \item Potencia (W).
+  \item Cadencia (RPM).
+  \item Velocidad virtual (km/h).
+  \item Frecuencia cardíaca (BPM).
+\end{itemize}
+
+El desafío técnico principal en esta etapa fue la sincronización. Dado que el
+video y los sensores operaron con relojes independientes, se implementó un
+mecanismo de alineación temporal en el postprocesamiento. Se utilizó la señal
+de cadencia como disparador: el inicio del movimiento de las bielas que fue
+detectado en el video se alineó con el primer valor positivo de RPM que fue
+registrado por los sensores. % La figura \ref{fig:senales_sensores}
+% muestra un ejemplo de las señales capturadas y sincronizadas listas para el
+% procesamiento.
+
+% \begin{figure}[htbp]
+%   \centering
+%   % Placeholder para la imagen: ./Figures/grafico_senales.png
+%   \framebox{\parbox{0.8\textwidth}{\centering
+%       \vspace{2cm}
+%       \textbf{[Figura: Gráfico de señales de sensores]} \\
+%       \small\textit{Visualización de Potencia y Cadencia sincronizadas en el tiempo.}
+%       \vspace{2cm}
+%     }}
+%   \caption{Visualización de las señales de telemetría sincronizadas durante una sesión de captura.}
+%   \label{fig:senales_sensores}
+% \end{figure}
+
 %----------------------------------------------------------------------------------------
 
+\section{Modelado cinemático y biomecánico}
+\label{sec:modelado_cinematico}
 
+Una vez que fueron extraídas las coordenadas $(x, y)$ de los puntos anatómicos
+clave mediante la red neuronal, se procedió al modelado cinemático. El objetivo
+de este módulo fue transformar datos posicionales abstractos en métricas
+biomecánicas con significado clínico y deportivo.
 
+El modelo geométrico se construyó con base en la cinemática vectorial. Se
+definieron vectores que representan los segmentos corporales del ciclista
+(fémur, tibia, torso, húmero, radio). A partir de estos vectores, se calcularon
+los ángulos articulares dinámicos en cada cuadro del video mediante el producto
+escalar. Los ángulos críticos que fueron modelados incluyeron:
+
+\begin{itemize}
+  \item Ángulo de extensión de rodilla (KFA): calculado en el punto muerto inferior (PMI). Es el predictor principal de la altura correcta del sillín.
+  \item Ángulo de flexión de cadera: evaluado en el punto muerto superior (PMS). Determina la restricción aerodinámica y el riesgo de pinzamiento acetabular.
+  \item Ángulo del hombro y codo: indicadores del alcance (\textit{reach}) y la caída (\textit{drop}) del manillar.
+  \item Ángulo del tobillo: analizado para evaluar la técnica de pedaleo (\textit{ankling}).
+\end{itemize}
+
+% En la figura \ref{fig:keypoints_angulos} se presenta el esquema de los puntos
+% articulares que fueron rastreados y los ángulos resultantes. 
+Se aplicó un filtro de suavizado (filtro de Butterworth paso bajo) a las series
+temporales de los ángulos para eliminar el ruido de alta frecuencia que fue
+introducido por la detección cuadro a cuadro (\textit{jitter}).
+
+% \begin{figure}[htbp]
+%   \centering
+%   % Placeholder para la imagen: ./Figures/esquema_angulos.png
+%   \framebox{\parbox{0.6\textwidth}{\centering
+%       \vspace{3cm}
+%       \textbf{[Figura: Esquema de ángulos]} \\
+%       \small\textit{Diagrama del ciclista con keypoints y ángulos superpuestos.}
+%       \vspace{3cm}
+%     }}
+%   \caption{Representación del modelo cinemático: \textit{keypoints} detectados y ángulos articulares calculados.}
+%   \label{fig:keypoints_angulos}
+% \end{figure}
+
+La validación de estos ángulos se realizó contra rangos de referencia
+bibliográficos. La tabla \ref{tab:rangos_biomecanicos} detalla los parámetros
+biomecánicos monitoreados y sus ventanas de operación óptimas utilizadas como
+restricciones en el sistema.
+
+\begin{table}[htbp]
+  \caption{Parámetros biomecánicos y rangos óptimos definidos para el modelo.}
+  \label{tab:rangos_biomecanicos}
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+    Parámetro Articular        & Rango Óptimo (Grados)          & Punto del Ciclo   \\ \midrule
+    Extensión de Rodilla (KFA) & 135$^{\circ}$ -- 145$^{\circ}$ & PMI               \\
+    Flexión de Cadera          & 50$^{\circ}$ -- 60$^{\circ}$   & PMS               \\
+    Ángulo de Hombro           & 80$^{\circ}$ -- 90$^{\circ}$   & Estático/Dinámico \\
+    Ángulo de Codo             & 150$^{\circ}$ -- 160$^{\circ}$ & Estático/Dinámico \\
+    Extensión de Tobillo       & 90$^{\circ}$ -- 100$^{\circ}$  & Promedio          \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+%----------------------------------------------------------------------------------------
+
+\section{Modelado del sistema}
+\label{sec:modelado_sistema}
+
+Esta sección describe el ``cerebro'' del sistema, que fue compuesto por la
+integración del modelo de detección de pose y el motor de optimización.
+
+\subsection{Detección de pose}
+Para la etapa de percepción, se implementó el modelo \textit{MediaPipe
+  BlazePose}. Tal como se justificó en el marco teórico, este modelo ofrece una
+topología de 33 puntos que incluye marcadores específicos para los pies,
+esenciales para el análisis de ciclismo. La red neuronal procesó el flujo de
+video cuadro a cuadro, y se infirió la posición espacial del esqueleto del
+ciclista. Se configuró el modelo con parámetros de confianza de detección y
+seguimiento superiores a 0.5 para filtrar falsos positivos en fondos complejos.
+
+\subsection{Motor de optimización}
+El núcleo de la propuesta es el algoritmo de optimización multi-objetivo. Dado
+que la relación entre los ajustes de la bicicleta y la respuesta biomecánica es
+no lineal y compleja, se diseñó un Algoritmo Genético (AG). Este enfoque
+heurístico permite explorar eficientemente el espacio de soluciones sin
+necesidad de conocer la derivada de la función objetivo.
+
+El problema de optimización se formuló de la siguiente manera:
+\begin{itemize}
+  \item Genes: los parámetros ajustables de la bicicleta (altura del sillín, retroceso
+        del sillín, longitud de la potencia, altura del manillar).
+  \item Función de aptitud: una función compuesta que busca minimizar el error entre
+        los ángulos medidos y los rangos óptimos, maximizar la eficiencia teórica de
+        potencia y minimizar el área frontal (estimación aerodinámica).
+\end{itemize}
+
+El flujo del algoritmo, comenzó con una población inicial de configuraciones
+aleatorias (dentro de límites mecánicos viables). A través de iteraciones
+sucesivas de selección, cruce y mutación, el sistema convergió hacia una
+configuración que satisfizo las restricciones biomecánicas con el mejor
+compromiso de rendimiento.% que se representa en la figura \ref{fig:flujo_optimizacion}, 
+
+% \begin{figure}[htbp]
+%   \centering
+%   % Placeholder para la imagen: ./Figures/flujo_algoritmo.png
+%   \framebox{\parbox{0.7\textwidth}{\centering
+%       \vspace{3cm}
+%       \textbf{[Figura: Algoritmo Genético]} \\
+%       \small\textit{Diagrama de flujo: Población $\rightarrow$ Evaluación $\rightarrow$ Selección $\rightarrow$ Cruce/Mutación.}
+%       \vspace{3cm}
+%     }}
+%   \caption{Diagrama de flujo del algoritmo de optimización biomecánica.}
+%   \label{fig:flujo_optimizacion}
+% \end{figure}
+
+En la tabla \ref{tab:parametros_optimizacion} se detallan los parámetros de
+configuración del algoritmo genético que fueron utilizados para asegurar la
+convergencia y evitar óptimos locales.
+
+\begin{table}[htbp]
+  \caption{Parámetros de configuración del algoritmo de optimización.}
+  \label{tab:parametros_optimizacion}
+  \centering
+  \begin{tabular}{lc}
+    \toprule
+    Parámetro del Algoritmo  & Valor / Configuración          \\ \midrule
+    Tamaño de la población   & 100 individuos                 \\
+    Número de generaciones   & 50                             \\
+    Probabilidad de cruce    & 0.8                            \\
+    Probabilidad de mutación & 0.2                            \\
+    Método de selección      & Torneo                         \\
+    Restricciones anatómicas & Límites fisiológicos definidos \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+%----------------------------------------------------------------------------------------
+
+\section{Reporte de recomendaciones}
+\label{sec:reporte}
+
+La etapa final del diseño corresponde a la interfaz de salida. Se desarrolló un
+módulo generador de reportes automatizados en formato PDF, que fue diseñado
+para traducir los resultados matemáticos de la optimización en instrucciones
+comprensibles para el usuario final.
+
+El reporte sintetiza el análisis en tres secciones:
+\begin{enumerate}
+  \item Diagnóstico actual: presentación visual de la postura inicial del ciclista con
+        los ángulos medidos que fueron superpuestos sobre la imagen original,
+        destacando en color rojo aquellos valores fuera del rango seguro.
+  \item Plan de ejecución: una lista detallada de las modificaciones mecánicas
+        sugeridas. Cada instrucción especifica el componente a ajustar, la dirección
+        del ajuste y la magnitud en milímetros (ej. ``Subir sillín 5mm'', ``Adelantar
+        sillín 2mm'').
+  \item Predicción de resultados: una proyección de los nuevos ángulos biomecánicos
+        esperados tras realizar los cambios sugeridos.
+\end{enumerate}
+
+Este documento sirve como guía para que el ciclista modifique la configuración
+de su bicicleta. Tras la ejecución de los cambios, el sistema sugiere reiniciar
+el proceso de adquisición de datos para validar las mejoras, lo que cierra el
+ciclo de optimización continua. % La figura \ref{fig:ejemplo_reporte} muestra un
+% ejemplo del reporte que fue generado por el prototipo.
+
+% \begin{figure}[htbp]
+%   \centering
+%   % Placeholder para la imagen: ./Figures/ejemplo_reporte.png
+%   \framebox{\parbox{0.6\textwidth}{\centering
+%     \vspace{3cm}
+%     \textbf{[Figura: Ejemplo de Reporte PDF]} \\
+%       \small\textit{Muestra del documento final con las recomendaciones.}
+%       \vspace{3cm}
+%     }}
+%   \caption{Ejemplo del reporte final con recomendaciones de ajuste generado por el sistema.}
+%   \label{fig:ejemplo_reporte}
+% \end{figure}
+
+% --- FIN DEL CAPÍTULO 3 ---
