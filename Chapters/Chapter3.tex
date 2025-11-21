@@ -30,8 +30,8 @@ ajustadas al contexto del trabajo:
   \item Comprensión del negocio y del problema biomecánico.
   \item Comprensión y adquisición de los datos (video, sensores de rendimiento y datos
         antropométricos).
-  \item Preparación y preprocesamiento de los datos, lo que incluyó la extracción de pose
-        y el filtrado de señales.
+  \item Preparación y preprocesamiento de los datos, lo que incluyó la extracción de
+        pose y el filtrado de señales.
   \item Modelado y simulación biomecánica y aerodinámica.
   \item Evaluación de las soluciones generadas por el optimizador (análisis del frente
         de Pareto).
@@ -67,8 +67,8 @@ recomendaciones biomecánicas accionables y deterministas.
 La arquitectura modular permitió el desacoplamiento estricto de las capas de
 percepción, modelado físico y razonamiento algorítmico, lo que facilitó la
 actualización independiente de los modelos de redes neuronales o los parámetros
-del algoritmo genético sin que se comprometiera la integridad operativa del sistema
-global.
+del algoritmo genético sin que se comprometiera la integridad operativa del
+sistema global.
 
 El flujo lógico de datos, conceptualizado en el diagrama de bloques de la
 Figura \ref{fig:arquitectura_sistema}, se organiza en cinco etapas secuenciales
@@ -85,8 +85,9 @@ convergencia matemática de la solución óptima:
 \begin{enumerate}
   \item Entrada de datos (capa de adquisición): módulo de abstracción de hardware
         encargado de la captura sincronizada de fuentes heterogéneas, el cual gestionó
-        \textit{buffers} circulares para video de alta velocidad y telemetría mediante 
-        protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (Bluetooth Low Energy) \citep{Gomez2012BLE}.
+        \textit{buffers} circulares para video de alta velocidad y telemetría mediante
+        protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (Bluetooth Low Energy)
+        \citep{Gomez2012BLE}.
   \item Procesamiento y análisis (capa de percepción): etapa de acondicionamiento de
         señal donde se ejecutó la inferencia de la red neuronal de detección de pose,
         se realizó la alineación temporal mediante correlación cruzada de señales y se
@@ -132,28 +133,43 @@ estrictas de hardware para garantizar la integridad de los mapas de calor
 generados por la red neuronal en etapas posteriores:
 
 \begin{itemize}
-  \item Velocidad de obturación: se impuso un tiempo de exposición máximo de $t_{exp} \leq 1/500$ s. Esto fue crítico para eliminar el desenfoque de movimiento (\textit{motion blur}) en los marcadores anatómicos (especialmente el maléolo lateral \citep{Radiologia2013} y el quinto metatarso \citep{Wikipedia5Meta}), los cuales alcanzan velocidades angulares máximas $\omega_{max}$ en los puntos muertos del ciclo de pedaleo. El desenfoque en estas fases introduce un error sistemático no gaussiano en la inferencia de la posición articular.
-  \item Tasa de fotogramas: se requirió una frecuencia de muestreo mínima de $f_s \geq 60$ FPS para cumplir con el teorema de Nyquist-Shannon \citep{Nyquist1928} aplicado a la cinemática del pedaleo, donde los armónicos de movimiento significativos se encuentran por debajo de 15 Hz.
-  \item Normalización de entrada: la resolución de entrada se redimensionó dinámicamente para coincidir con el tensor de entrada de la CNN mediante interpolación bicúbica, lo que evitó artefactos de degradación de la señal (\textit{aliasing}).
+  \item Velocidad de obturación: se impuso un tiempo de exposición máximo de $t_{exp}
+          \leq 1/500$ s. Esto fue crítico para eliminar el desenfoque de movimiento
+        (\textit{motion blur}) en los marcadores anatómicos (especialmente el maléolo
+        lateral \citep{Radiologia2013} y el quinto metatarso \citep{Wikipedia5Meta}),
+        los cuales alcanzan velocidades angulares máximas $\omega_{max}$ en los puntos
+        muertos del ciclo de pedaleo. El desenfoque en estas fases introduce un error
+        sistemático no gaussiano en la inferencia de la posición articular.
+  \item Tasa de fotogramas: se requirió una frecuencia de muestreo mínima de $f_s \geq
+          60$ FPS para cumplir con el teorema de Nyquist-Shannon \citep{Nyquist1928}
+        aplicado a la cinemática del pedaleo, donde los armónicos de movimiento
+        significativos se encuentran por debajo de 15 Hz.
+  \item Normalización de entrada: la resolución de entrada se redimensionó
+        dinámicamente para coincidir con el tensor de entrada de la CNN mediante
+        interpolación bicúbica, lo que evitó artefactos de degradación de la señal
+        (\textit{aliasing}).
 \end{itemize}
 
 \subsection{Entorno de análisis y telemetría}
 Simultáneamente, se implementó la recolección de datos de rendimiento mediante
 protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (Bluetooth Low Energy)
 \citep{Gomez2012BLE}. El sistema se implementó sobre la plataforma
-GoldenCheetah \citep{goldencheetah_web}, cuyo motor de ejecución de
-Python integrado fue empleado como núcleo de procesamiento.
+GoldenCheetah \citep{goldencheetah_web}, cuyo motor de ejecución de Python
+integrado fue empleado como núcleo de procesamiento.
 
-Esta arquitectura permitió la manipulación de datos de alto nivel y superó
-las limitaciones del procesamiento de tramas crudas. En lugar de calcular la
+Esta arquitectura permitió la manipulación de datos de alto nivel y superó las
+limitaciones del procesamiento de tramas crudas. En lugar de calcular la
 potencia media $\bar{P}$ mediante diferencias de acumulados a nivel de byte, el
 sistema utilizó las estructuras de datos internas de GoldenCheetah, lo que
 garantizó la integridad y sincronización temporal de las muestras. La
 implementación se basó en dos pilares documentados en la API:
 
 \begin{itemize}
-  \item Acceso a datos: recuperación de actividades y series temporales mediante funciones nativas, lo que aseguró la coherencia de los datos independientemente del protocolo de transmisión.
-  \item Procesadores personalizados: implementación de algoritmos definidos por el usuario que operaron sobre la señal de potencia $P(t)$ ya depurada.
+  \item Acceso a datos: recuperación de actividades y series temporales mediante
+        funciones nativas, lo que aseguró la coherencia de los datos independientemente
+        del protocolo de transmisión.
+  \item Procesadores personalizados: implementación de algoritmos definidos por el
+        usuario que operaron sobre la señal de potencia $P(t)$ ya depurada.
 \end{itemize}
 
 Las variables capturadas incluyeron: Potencia (W), Cadencia (RPM), Velocidad
@@ -169,8 +185,8 @@ El \textit{pipeline} implementó un algoritmo de alineación basado en la
 cadencia para encontrar el desfase óptimo:
 
 \begin{enumerate}
-  \item Se extrajo una señal de cadencia visual ($\omega_{vis}$) mediante el análisis de la
-        periodicidad de la coordenada vertical de la rodilla ($y_{knee}$) con la
+  \item Se extrajo una señal de cadencia visual ($\omega_{vis}$) mediante el análisis
+        de la periodicidad de la coordenada vertical de la rodilla ($y_{knee}$) con la
         Transformada de Fourier de Tiempo Corto (STFT).
   \item Se obtuvo la señal de cadencia del sensor de potencia ($\omega_{sens}$).
   \item Se calculó la correlación cruzada normalizada $R_{vs}(\tau)$ para encontrar el
@@ -182,8 +198,8 @@ cadencia para encontrar el desfase óptimo:
 \end{equation}
 
 Esto permitió alinear el pico de fuerza aplicado en el pedal con el ángulo de
-la biela correspondiente con precisión de sub-fotograma, lo que superó la simple
-alineación por inicio de movimiento.
+la biela correspondiente con precisión de sub-fotograma, lo que superó la
+simple alineación por inicio de movimiento.
 
 %----------------------------------------------------------------------------------------
 %	MODELADO (Aquí movemos la física: Ángulos, Aero y Dinámica Inversa)
@@ -197,41 +213,111 @@ de este módulo fue transformar datos posicionales abstractos en métricas
 biomecánicas con significado clínico y deportivo, e integrar modelos físicos
 avanzados.
 
+%----------------------------------------------------------------------------------------
+%	ANÁLISIS CINEMÁTICO
+%----------------------------------------------------------------------------------------
 \subsection{Análisis cinemático angular}
-El modelo geométrico se construyó con base en la cinemática vectorial. Se
-definieron vectores que representan los segmentos corporales del ciclista
-(fémur, tibia, torso, húmero, radio). A partir de estos vectores, se calcularon
-los ángulos articulares dinámicos en cada cuadro del video mediante el producto
-escalar.
+\label{subsec:cinematica_angular}
 
-Los ángulos críticos modelados incluyeron:
-\begin{itemize}
-  \item Ángulo de extensión de rodilla (KFA): calculado en el punto muerto inferior (PMI). Es el predictor principal de la altura correcta del sillín.
-  \item Ángulo de flexión de cadera: evaluado en el punto muerto superior (PMS). Determina la restricción aerodinámica y el riesgo de pinzamiento acetabular.
-  \item Ángulo del hombro y codo: indicadores del alcance (\textit{reach}) y la caída (\textit{drop}) del manillar.
-  \item Ángulo del tobillo: analizado para evaluar la técnica de pedaleo (\textit{ankling}).
-\end{itemize}
+Tras la extracción de las coordenadas articulares mediante la red neuronal, el
+sistema aborda la reconstrucción cinemática. A diferencia de enfoques
+simplistas que calculan ángulos planos entre vectores 2D, este trabajo
+implementa una formulación rigurosa basada en los estándares de la Sociedad
+Internacional de Biomecánica (ISB) para evitar errores
+cinemático y singularidades matemáticas \citep{Wu2002_ISB_Part1}.
 
-Se aplicó un filtro de suavizado (filtro de Butterworth paso bajo) a las series
-temporales de los ángulos para eliminar el ruido de alta frecuencia introducido
-por la detección cuadro a cuadro (\textit{jitter}). La validación de estos
-ángulos se realizó contra rangos de referencia bibliográficos, detallados en la
-tabla \ref{tab:rangos_biomecanicos}.
+\subsubsection{Definición de sistemas de coordenadas locales}
+Para garantizar la reproducibilidad clínica y la consistencia física, se
+construyen marcos de referencia ortonormales para cada segmento corporal (fémur
+y tibia), abandonando la geometría euclidiana simple en favor del álgebra
+vectorial tridimensional.
 
-\begin{table}[htbp]
-  \caption{Parámetros biomecánicos y rangos óptimos definidos para el modelo.}
-  \label{tab:rangos_biomecanicos}
-  \centering
-  \begin{tabular}{lcc}
-    \toprule
-    Parámetro Articular        & Rango Óptimo (Grados)          & Punto del Ciclo   \\ \midrule
-    Extensión de Rodilla (KFA) & 135$^{\circ}$ -- 145$^{\circ}$ & PMI               \\
-    Flexión de Cadera          & 50$^{\circ}$ -- 60$^{\circ}$   & PMS               \\
-    Ángulo de Hombro           & 80$^{\circ}$ -- 90$^{\circ}$   & Estático/Dinámico \\
-    Ángulo de Codo             & 150$^{\circ}$ -- 160$^{\circ}$ & Estático/Dinámico \\
-    Extensión de Tobillo       & 90$^{\circ}$ -- 100$^{\circ}$  & Promedio          \\ \bottomrule
-  \end{tabular}
-\end{table}
+Para el segmento femoral, definimos el origen $O_f$ en el Centro Articular de
+la Cadera (HJC). Se construye el eje longitudinal $\mathbf{Y}_f$ mediante el
+vector unitario que conecta el punto medio de los epicóndilos femorales
+($\mathbf{M}_{FE}$) con el HJC:
+
+\begin{equation}
+  \mathbf{Y}_f = \frac{\mathbf{r}_{HJC} - \mathbf{M}_{FE}}{||\mathbf{r}_{HJC} - \mathbf{M}_{FE}||}
+\end{equation}
+
+Para resolver la orientación espacial, se define un eje auxiliar
+$\mathbf{Z}_{temp}$ que une los epicóndilos lateral y medial, lo que permite
+calcular el eje antero-posterior $\mathbf{X}_f$ mediante producto vectorial,
+asegurando la ortogonalidad respecto al plano cuasi-frontal:
+
+\begin{equation}
+  \mathbf{X}_f = \frac{\mathbf{Y}_f \times \mathbf{Z}_{temp}}{||\mathbf{Y}_f \times \mathbf{Z}_{temp}||}, \quad \quad \mathbf{Z}_f = \mathbf{X}_f \times \mathbf{Y}_f
+\end{equation}
+
+De manera análoga, el sistema de coordenadas tibial ($\mathcal{F}_{tibia}$) se
+define con origen en $\mathbf{M}_{FE}$, utilizando el eje transmaleolar para la
+orientación distal .
+
+\subsubsection{Cálculo de la matriz de rotación y ángulos de Euler}
+La cinemática angular de la rodilla se obtiene proyectando la orientación del
+marco tibial sobre el espacio vectorial del fémur. Si definimos
+${}^G\mathbf{R}_f$ y ${}^G\mathbf{R}_t$ como las matrices de rotación absoluta
+de fémur y tibia respecto al sistema global, la matriz de orientación relativa
+${}^f\mathbf{R}_t$ se calcula como:
+
+\begin{equation}
+  {}^f\mathbf{R}_t = ({}^G\mathbf{R}_f)^T \cdot {}^G\mathbf{R}_t = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}
+\end{equation}
+
+Para descomponer esta matriz en métricas clínicamente significativas, se
+implementó la secuencia de rotación de Grood \& Suntay (Z-X-Y), estándar ISB
+para la rodilla \citep{GroodSuntay1983}. El ángulo de flexión/extensión ($\alpha$), variable
+crítica para la optimización de la altura del sillín, se extrae mediante:
+
+\begin{equation}
+  \alpha_{flexion} = \arctan2(-r_{12}, r_{22})
+\end{equation}
+
+Esta formulación desacopla matemáticamente la flexión pura de los movimientos
+parásitos de abducción y rotación axial, proporcionando una señal de entrada
+limpia para el algoritmo genético.
+
+\subsubsection{Estimación de estado mediante Filtro de Kalman}
+Uno de los avances metodológicos de este sistema respecto a la literatura
+convencional es la sustitución del filtrado determinista (Butterworth)  \citep{Winter2009_Biomechanics} por un
+estimador estocástico recursivo. Dado que el modelo de detección de pose
+introduce ruido de alta frecuencia ("jitter") y que el filtrado convencional
+introduce latencia de fase inaceptable para aplicaciones en tiempo real, se
+implementó un Filtro de Kalman Lineal basado en un modelo cinemático de
+Aceleración Angular Constante (CA).
+
+Para cada grado de libertad articular $\theta$, se define el vector de estado
+$\mathbf{x}_k$ en el instante $k$, el cual incluye explícitamente la velocidad
+y aceleración angular necesarias para la etapa dinámica posterior:
+
+\begin{equation}
+  \mathbf{x}_k = \begin{bmatrix} \theta_k \\ \dot{\theta}_k \\ \ddot{\theta}_k \end{bmatrix}
+\end{equation}
+
+El modelo de transición de estado a priori, que predice la cinemática en $k$
+basándose en $k-1$ y las ecuaciones de movimiento de Newton, se rige por la
+matriz de transición $\mathbf{F}$:
+
+\begin{equation}
+  \hat{\mathbf{x}}_{k|k-1} = \mathbf{F} \hat{\mathbf{x}}_{k-1|k-1}, \quad \text{donde} \quad \mathbf{F} = \begin{bmatrix} 1 & \Delta t & \frac{1}{2}\Delta t^2 \\ 0 & 1 & \Delta t \\ 0 & 0 & 1 \end{bmatrix}
+\end{equation}
+
+La incertidumbre del modelo se gestiona mediante la matriz de covarianza del
+ruido del proceso $\mathbf{Q}$, diseñada para modelar la sobreaceleración
+(\textit{jerk}) como un ruido blanco espectral con densidad $\Phi_s$. Esto
+permite que el filtro se adapte dinámicamente a cambios bruscos de cadencia sin
+perder la suavidad de la señal:
+
+\begin{equation}
+  \mathbf{Q} = \Phi_s \begin{bmatrix} \frac{\Delta t^5}{20} & \frac{\Delta t^4}{8} & \frac{\Delta t^3}{6} \\ \frac{\Delta t^4}{8} & \frac{\Delta t^3}{3} & \frac{\Delta t^2}{2} \\ \frac{\Delta t^3}{6} & \frac{\Delta t^2}{2} & \Delta t \end{bmatrix}
+\end{equation}
+
+Finalmente, la actualización a posteriori corrige la predicción utilizando la
+medición ruidosa de la red neuronal $\mathbf{z}_k$, ponderada por la Ganancia
+de Kalman óptima $\mathbf{K}_k$. Esto resulta en vectores
+cinemáticos $(\theta, \dot{\theta}, \ddot{\theta})$ suaves y sincronizados en
+fase, listos para alimentar el modelo de dinámica inversa.
 
 \subsection{Estimación aerodinámica ($C_d A$)}
 En esta etapa se predijo el comportamiento del sistema ciclista-bicicleta bajo
@@ -241,8 +327,8 @@ utilizando una red de segmentación semántica sobre la vista lateral del
 ciclista.
 
 Aunque la vista lateral no captura directamente el área frontal, se aplicaron
-modelos de regresión multivariable (basados en estudios de Bassett y Heil) los cuales
-correlacionaron la pose sagital con el área frontal efectiva. El modelo
+modelos de regresión multivariable (basados en estudios de Bassett y Heil) los
+cuales correlacionaron la pose sagital con el área frontal efectiva. El modelo
 consideró la altura del torso y el ángulo de apertura de la cadera:
 
 \begin{equation}
@@ -252,23 +338,106 @@ consideró la altura del torso y el ángulo de apertura de la cadera:
 Esto permitió cuantificar el coste aerodinámico ($P_{aero} \propto v^3 \cdot
   A_{proj}$) de cambios posturales, como bajar la altura del manillar ($Stack$).
 
+%----------------------------------------------------------------------------------------
+%	DINÁMICA INVERSA
+%----------------------------------------------------------------------------------------
 \subsection{Dinámica inversa plana}
-Al combinar la cinemática filtrada y los vectores de fuerza derivados de la
-potencia (bajo el supuesto de una descomposición de fuerza tangencial efectiva), se
-resolvieron las ecuaciones de Newton-Euler para calcular los momentos netos
-articulares ($M_{net}$) en tobillo, rodilla y cadera. Esto permitió identificar
-ineficiencias mecánicas, como momentos de flexión excesivos en la rodilla los cuales
-no contribuyen a la propulsión.
+\label{subsec:dinamica_inversa}
 
-%----------------------------------------------------------------------------------------
-%	MODELADO DEL SISTEMA (Aquí va la AI: Pose + Optimización + Cost Functions)
-%----------------------------------------------------------------------------------------
+La evaluación de la eficiencia biomecánica ($J_{power}$) en la función de coste
+del optimizador requiere ir más allá de la cinemática pura para analizar las
+causas del movimiento (fuerzas y momentos). Dado que el ciclismo es una
+actividad restringida predominantemente al plano sagital, se formuló un modelo
+de dinámica inversa plana (2D) para calcular los torques netos
+articulares.
+
+Se empleó el método de Newton-Euler Recursivo \citep{Winter2009_Biomechanics}, resolviendo las ecuaciones de
+movimiento desde el segmento distal (pie/pedal) hacia el proximal (cadera).
+Este enfoque permite propagar las fuerzas de reacción del suelo medidas por los
+sensores de potencia a través de la cadena cinética del ciclista.
+
+\subsubsection{Definición de parámetros inerciales}
+Para cada segmento $i$ (pie, pierna, muslo), se modelaron las propiedades
+inerciales basadas en tablas antropométricas estándar escaladas a la masa del
+sujeto. Se definen $m_i$ como la masa del segmento, $I_i$ como el momento de
+inercia centroidal y $\mathbf{a}_{cm, i} = [a_{ix}, a_{iy}]^T$ como la
+aceleración lineal del centro de masas, derivada de la cinemática filtrada en
+la sección anterior.
+
+\subsubsection{Dinámica del segmento distal (Pie)}
+El análisis inicia en la interfaz pedal-pie. Las fuerzas externas
+$\mathbf{F}_{pedal} = [F_{px}, F_{py}]^T$ se descomponen en el sistema global.
+Aplicando la segunda ley de Newton, se calculan las fuerzas de reacción en el
+tobillo ($\mathbf{F}_{ankle}$):
+
+\begin{equation}
+  F_{ankle\_x} = m_{foot} a_{foot\_x} - F_{px}
+\end{equation}
+\begin{equation}
+  F_{ankle\_y} = m_{foot} (a_{foot\_y} + g) - F_{py}
+\end{equation}
+
+Para el equilibrio de momentos, se aplica la ecuación de Euler respecto al
+centro de masas (CM) para eliminar el término de aceleración lineal del CM. El
+torque neto muscular en el tobillo $M_{ankle}$ se despeja considerando los
+momentos generados por las fuerzas de reacción y la inercia rotacional del
+segmento:
+
+\begin{equation}
+  \begin{aligned}
+    M_{ankle} = & \ I_{foot} \alpha_{foot} - M_{pedal}                              \\
+                & - (x_{ankle}-x_{cm}) F_{ankle_y} + (y_{ankle}-y_{cm}) F_{ankle_x} \\
+                & - (x_{pedal}-x_{cm}) F_{py} + (y_{pedal}-y_{cm}) F_{px}
+  \end{aligned}
+\end{equation}
+
+\subsubsection{Propagación recursiva (Pierna y Muslo)}
+Siguiendo el principio de acción y reacción (Tercera Ley de Newton), las
+fuerzas y momentos ejercidos por el pie sobre la pierna son
+$-\mathbf{F}_{ankle}$ y $-M_{ankle}$. Para el segmento de la pierna (shank),
+las ecuaciones de equilibrio en la rodilla se formulan como:
+
+\begin{equation}
+  \mathbf{F}_{knee} = m_{shank} (\mathbf{a}_{shank} - \mathbf{g}) + \mathbf{F}_{ankle}
+\end{equation}
+
+El momento neto en la rodilla $M_{knee}$, variable crítica que el optimizador
+busca minimizar para reducir el riesgo de lesión patelar, se calcula sumando
+los torques inerciales y los producidos por las fuerzas articulares distales y
+proximales respecto al CM de la pierna:
+
+\begin{equation}
+  \begin{aligned}
+    M_{knee} = & \ I_{shank} \alpha_{shank} + M_{ankle}                                    \\
+               & - [(x_{knee}-x_{cm}) F_{knee_y} - (y_{knee}-y_{cm}) F_{knee_x}]           \\
+               & - [(x_{ankle}-x_{cm}) (-F_{ankle_y}) - (y_{ankle}-y_{cm}) (-F_{ankle_x})]
+  \end{aligned}
+\end{equation}
+
+Este proceso se repite recursivamente para el segmento del muslo (thigh) para
+obtener el torque de cadera $M_{hip}$.
+
+\subsubsection{Cálculo de Potencia Articular}
+Finalmente, la eficiencia biomecánica se cuantifica mediante la potencia
+mecánica instantánea $P_{joint}$ generada o absorbida en cada articulación.
+Esta métrica integra la salida cinética con la cinemática, calculándose como el
+producto escalar del momento neto y la velocidad angular relativa de la
+articulación $\omega_{joint}$:
+
+\begin{equation}
+  P_{joint}(t) = M_{joint}(t) \cdot (\dot{\theta}_{proximal}(t) - \dot{\theta}_{distal}(t))
+\end{equation}
+
+La integral de esta potencia a lo largo del ciclo de pedaleo constituye la
+función objetivo $J_{power}$ que el algoritmo genético minimiza, buscando la
+configuración geométrica que permita generar los mismos vatios externos con el
+menor coste mecánico interno.
+
 \section{Modelado del sistema de decisión}
 \label{sec:modelado_sistema}
 
-Esta sección describe el cerebro del sistema, compuesto por la integración
-del modelo de detección de pose inteligente y el motor de optimización
-matemática.
+Esta sección describe el cerebro del sistema, compuesto por la integración del
+modelo de detección de pose inteligente y el motor de optimización matemática.
 
 \subsection{Detección de pose y corrección cinemática}
 Para la etapa de percepción, se implementó el modelo \textit{MediaPipe
@@ -292,61 +461,69 @@ Donde $L_{seg}(t)$ es la longitud euclidiana del segmento en el instante $t$ y
 $\mu_{L_{seg}}$ es la longitud media calibrada.
 
 \subsection{Motor de optimización multi-objetivo}
-El núcleo de la propuesta es el algoritmo de optimización multi-objetivo. Dado
-que la relación entre los ajustes de la bicicleta y la respuesta biomecánica es
-no lineal y compleja, se diseñó un Algoritmo Genético (AG). Este enfoque
-heurístico permite explorar eficientemente el espacio de soluciones sin
-necesidad de conocer la derivada de la función objetivo.
+% El núcleo de la propuesta es el algoritmo de optimización multi-objetivo. Dado
+% que la relación entre los ajustes de la bicicleta y la respuesta biomecánica es
+% no lineal y compleja, se diseñó un Algoritmo Genético (AG). Este enfoque
+% heurístico permite explorar eficientemente el espacio de soluciones sin
+% necesidad de conocer la derivada de la función objetivo.
 
-El problema de optimización se formuló de la siguiente manera:
-\begin{itemize}
-  \item Genes: los parámetros ajustables de la bicicleta (altura del sillín, retroceso del sillín, longitud de la potencia, altura del manillar).
-  \item Vector de estado: $\mathbf{x} = [h_{sillin}, x_{sillin}, h_{manillar}, x_{manillar}]$
-\end{itemize}
+% El problema de optimización se formuló de la siguiente manera:
+% \begin{itemize}
+%   \item Genes: los parámetros ajustables de la bicicleta (altura del sillín, retroceso
+%         del sillín, longitud de la potencia, altura del manillar).
+%   \item Vector de estado: $\mathbf{x} = [h_{sillin}, x_{sillin}, h_{manillar},
+%           x_{manillar}]$
+% \end{itemize}
 
 \subsubsection{Funciones objetivo detalladas}
-El sistema minimizó tres funciones de coste ($J$) que representan el conflicto
-de objetivos:
+% El sistema minimizó tres funciones de coste ($J$) que representan el conflicto
+% de objetivos:
 
-\begin{enumerate}
-  \item Minimizar disconfort ($J_{comfort}$): función de penalización cuadrática que se disparó cuando los ángulos articulares $\theta_j$ (extensión de rodilla, flexión de hombro, etc.) salieron de los rangos fisiológicos seguros predefinidos en la literatura médica:
-        \begin{equation}
-          J_{comfort}(\mathbf{x}) = \sum_{j=1}^{N} w_j \cdot \max(0, \theta_j(\mathbf{x}) - \theta_{max}, \theta_{min} - \theta_j(\mathbf{x}))^2
-        \end{equation}
-  \item Maximizar eficiencia biomecánica ($J_{power}$): se buscó minimizar la integral del momento articular absoluto necesario para producir una potencia objetivo, lo que implicó la búsqueda de una palanca más efectiva.
-  \item Minimizar resistencia aerodinámica ($J_{aero}$): minimización directa del $C_d A$ estimado en la etapa de modelado físico (Sección 3.4.2).
-\end{enumerate}
+% \begin{enumerate}
+%   \item Minimizar disconfort ($J_{comfort}$): función de penalización cuadrática que se
+%         disparó cuando los ángulos articulares $\theta_j$ (extensión de rodilla,
+%         flexión de hombro, etc.) salieron de los rangos fisiológicos seguros
+%         predefinidos en la literatura médica:
+%         \begin{equation}
+%           J_{comfort}(\mathbf{x}) = \sum_{j=1}^{N} w_j \cdot \max(0, \theta_j(\mathbf{x}) - \theta_{max}, \theta_{min} - \theta_j(\mathbf{x}))^2
+%         \end{equation}
+%   \item Maximizar eficiencia biomecánica ($J_{power}$): se buscó minimizar la integral
+%         del momento articular absoluto necesario para producir una potencia objetivo,
+%         lo que implicó la búsqueda de una palanca más efectiva.
+%   \item Minimizar resistencia aerodinámica ($J_{aero}$): minimización directa del $C_d
+%           A$ estimado en la etapa de modelado físico (Sección 3.4.2).
+% \end{enumerate}
 
 \subsubsection{Configuración y flujo del algoritmo}
-El flujo del algoritmo comenzó con una población inicial de configuraciones
-aleatorias (dentro de límites mecánicos viables). Mediante iteraciones
-sucesivas de selección, cruce y mutación, el sistema convergió hacia una
-configuración que satisfizo las restricciones biomecánicas.
+% El flujo del algoritmo comenzó con una población inicial de configuraciones
+% aleatorias (dentro de límites mecánicos viables). Mediante iteraciones
+% sucesivas de selección, cruce y mutación, el sistema convergió hacia una
+% configuración que satisfizo las restricciones biomecánicas.
 
-Se empleó una población de $N=100$ individuos con codificación real. Se utilizó
-selección por torneo binario, cruzamiento simulado con probabilidad $p_c = 0.9$
-y mutación polinómica con probabilidad $p_m = 1/L$ (donde $L$ es el número de
-variables). El mecanismo de elitismo aseguró la preservación de las mejores
-soluciones del frente de Pareto a través de las generaciones.
+% Se empleó una población de $N=100$ individuos con codificación real. Se utilizó
+% selección por torneo binario, cruzamiento simulado con probabilidad $p_c = 0.9$
+% y mutación polinómica con probabilidad $p_m = 1/L$ (donde $L$ es el número de
+% variables). El mecanismo de elitismo aseguró la preservación de las mejores
+% soluciones del frente de Pareto a través de las generaciones.
 
-En la tabla \ref{tab:parametros_optimizacion} se detallan los parámetros de
-configuración utilizados.
+% En la tabla \ref{tab:parametros_optimizacion} se detallan los parámetros de
+% configuración utilizados.
 
-\begin{table}[htbp]
-  \caption{Parámetros de configuración del algoritmo de optimización.}
-  \label{tab:parametros_optimizacion}
-  \centering
-  \begin{tabular}{lc}
-    \toprule
-    Parámetro del Algoritmo  & Valor / Configuración          \\ \midrule
-    Tamaño de la población   & 100 individuos                 \\
-    Número de generaciones   & 50                             \\
-    Probabilidad de cruce    & 0.9                            \\
-    Probabilidad de mutación & $1/L$ (Polinómica)             \\
-    Método de selección      & Torneo Binario                 \\
-    Restricciones anatómicas & Límites fisiológicos definidos \\ \bottomrule
-  \end{tabular}
-\end{table}
+% \begin{table}[htbp]
+%   \caption{Parámetros de configuración del algoritmo de optimización.}
+%   \label{tab:parametros_optimizacion}
+%   \centering
+%   \begin{tabular}{lc}
+%     \toprule
+%     Parámetro del Algoritmo  & Valor / Configuración          \\ \midrule
+%     Tamaño de la población   & 100 individuos                 \\
+%     Número de generaciones   & 50                             \\
+%     Probabilidad de cruce    & 0.9                            \\
+%     Probabilidad de mutación & $1/L$ (Polinómica)             \\
+%     Método de selección      & Torneo Binario                 \\
+%     Restricciones anatómicas & Límites fisiológicos definidos \\ \bottomrule
+%   \end{tabular}
+% \end{table}
 
 %----------------------------------------------------------------------------------------
 %	REPORTE
@@ -354,21 +531,27 @@ configuración utilizados.
 \section{Reporte de recomendaciones}
 \label{sec:reporte}
 
-La etapa final del diseño corresponde a la interfaz de salida. Se desarrolló un
-módulo generador de reportes automatizados en formato PDF, diseñado para
-traducir los resultados matemáticos de la optimización en instrucciones
-comprensibles para el usuario final. El reporte sintetiza el análisis en tres
-secciones:
+% La etapa final del diseño corresponde a la interfaz de salida. Se desarrolló un
+% módulo generador de reportes automatizados en formato PDF, diseñado para
+% traducir los resultados matemáticos de la optimización en instrucciones
+% comprensibles para el usuario final. El reporte sintetiza el análisis en tres
+% secciones:
 
-\begin{enumerate}
-  \item Diagnóstico actual: presentación visual de la postura inicial del ciclista con los ángulos medidos superpuestos sobre la imagen original, destacando en color rojo aquellos valores fuera del rango seguro.
-  \item Plan de ejecución: una lista detallada de las modificaciones mecánicas sugeridas. Cada instrucción especifica el componente a ajustar, la dirección del ajuste y la magnitud en milímetros (por ejemplo, Subir sillín 5mm o Adelantar sillín 2mm).
-  \item Predicción de resultados: una proyección de los nuevos ángulos biomecánicos esperados tras realizar los cambios sugeridos.
-\end{enumerate}
+% \begin{enumerate}
+%   \item Diagnóstico actual: presentación visual de la postura inicial del ciclista con
+%         los ángulos medidos superpuestos sobre la imagen original, destacando en color
+%         rojo aquellos valores fuera del rango seguro.
+%   \item Plan de ejecución: una lista detallada de las modificaciones mecánicas
+%         sugeridas. Cada instrucción especifica el componente a ajustar, la dirección
+%         del ajuste y la magnitud en milímetros (por ejemplo, Subir sillín 5mm o
+%         Adelantar sillín 2mm).
+%   \item Predicción de resultados: una proyección de los nuevos ángulos biomecánicos
+%         esperados tras realizar los cambios sugeridos.
+% \end{enumerate}
 
-Este documento sirve como guía para la modificación de la configuración
-de la bicicleta. Tras la ejecución de los cambios, el sistema sugiere reiniciar
-el proceso de adquisición de datos para validar las mejoras, lo que cierra el
-ciclo de optimización continua.
+% Este documento sirve como guía para la modificación de la configuración de la
+% bicicleta. Tras la ejecución de los cambios, el sistema sugiere reiniciar el
+% proceso de adquisición de datos para validar las mejoras, lo que cierra el
+% ciclo de optimización continua.
 
 % --- FIN DEL CAPÍTULO 3 ---
