@@ -1,8 +1,8 @@
 \chapter{Diseño e implementación}
 \label{Chapter3}
 
-En este capítulo se presenta el diseño e implementación del sistema de
-optimización biomecánica desarrollado en este trabajo. Se describe la
+En este capítulo se presentan el diseño e implementación del sistema de
+optimización biomecánica desarrollado en este trabajo. Se describen la
 metodología empleada para estructurar el trabajo, la arquitectura del sistema
 propuesto y los módulos que lo componen. La exposición se organiza de manera
 secuencial, desde la adquisición de datos hasta la generación del reporte final
@@ -30,12 +30,12 @@ ajustadas al contexto del trabajo:
   \item Comprensión del negocio y del problema biomecánico.
   \item Comprensión y adquisición de los datos (video, sensores de rendimiento y datos
         antropométricos).
-  \item Preparación y preprocesamiento de los datos, lo que incluyó la extracción de
+  \item Preparación y preprocesamiento de los datos, que incluyó la extracción de
         pose y el filtrado de señales.
   \item Modelado y simulación biomecánica y aerodinámica.
   \item Evaluación de las soluciones generadas por el optimizador (análisis del frente
         de Pareto).
-  \item Despliegue, el cual fue materializado en la generación del reporte de
+  \item Despliegue, que fue materializado en la generación del reporte de
         recomendaciones para el ciclista.
 \end{itemize}
 
@@ -67,11 +67,11 @@ recomendaciones biomecánicas accionables y deterministas.
 La arquitectura modular permitió el desacoplamiento estricto de las capas de
 percepción, modelado físico y razonamiento algorítmico, lo que facilitó la
 actualización independiente de los modelos de redes neuronales o los parámetros
-del algoritmo genético sin que se comprometiera la integridad operativa del
+del algoritmo genético sin comprometer la integridad operativa del
 sistema global.
 
 El flujo lógico de datos, conceptualizado en el diagrama de bloques de la
-Figura \ref{fig:arquitectura_sistema}, se organiza en cinco etapas secuenciales
+figura \ref{fig:arquitectura_sistema}, se organiza en cinco etapas secuenciales
 críticas que abordan desde la física de la adquisición de la señal hasta la
 convergencia matemática de la solución óptima:
 
@@ -84,9 +84,9 @@ convergencia matemática de la solución óptima:
 
 \begin{enumerate}
   \item Entrada de datos (capa de adquisición): módulo de abstracción de hardware
-        encargado de la captura sincronizada de fuentes heterogéneas, el cual gestionó
+        encargado de la captura sincronizada de fuentes heterogéneas, el que gestionó
         \textit{buffers} circulares para video de alta velocidad y telemetría mediante
-        protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (Bluetooth Low Energy)
+        protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (\textit{Bluetooth Low Energy})
         \citep{Gomez2012BLE}.
   \item Procesamiento y análisis (capa de percepción): etapa de acondicionamiento de
         señal donde se ejecutó la inferencia de la red neuronal de detección de pose,
@@ -107,7 +107,7 @@ convergencia matemática de la solución óptima:
 Esta arquitectura fue diseñada para ejecutarse completamente en el borde, lo
 que permitió minimizar la latencia de inferencia y garantizar la privacidad de
 los datos biomecánicos del ciclista al mantener todo el procesamiento local sin
-necesidad de conexión a servicios externos. A continuación, se detalla la
+necesidad de conexión a servicios externos. A continuación se detallan la
 implementación técnica específica de cada módulo.
 
 %----------------------------------------------------------------------------------------
@@ -137,8 +137,8 @@ generados por la red neuronal en etapas posteriores:
           \leq 1/500$ s. Esto fue crítico para eliminar el desenfoque de movimiento
         (\textit{motion blur}) en los marcadores anatómicos (especialmente el maléolo
         lateral \citep{Radiologia2013} y el quinto metatarso \citep{Wikipedia5Meta}),
-        los cuales alcanzan velocidades angulares máximas $\omega_{max}$ en los puntos
-        muertos del ciclo de pedaleo. El desenfoque en estas fases introduce un error
+        los que alcanzan velocidades angulares máximas $\omega_{max}$ en los puntos
+        muertos del ciclo de pedaleo. El desenfoque en estas fases introdujo un error
         sistemático no gaussiano en la inferencia de la posición articular.
   \item Tasa de fotogramas: se requirió una frecuencia de muestreo mínima de $f_s \geq
           60$ FPS para cumplir con el teorema de Nyquist-Shannon \citep{Nyquist1928}
@@ -152,7 +152,7 @@ generados por la red neuronal en etapas posteriores:
 
 \subsection{Entorno de análisis y telemetría}
 Simultáneamente, se implementó la recolección de datos de rendimiento mediante
-protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (Bluetooth Low Energy)
+protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (\textit{Bluetooth Low Energy})
 \citep{Gomez2012BLE}. El sistema se implementó sobre la plataforma
 GoldenCheetah \citep{goldencheetah_web}, cuyo motor de ejecución de Python
 integrado fue empleado como núcleo de procesamiento.
@@ -172,10 +172,10 @@ implementación se basó en dos pilares documentados en la API:
         usuario que operaron sobre la señal de potencia $P(t)$ ya depurada.
 \end{itemize}
 
-Las variables capturadas incluyeron: Potencia (W), Cadencia (RPM), Velocidad
-virtual (km/h) y Frecuencia cardíaca (BPM) y derivadas.
+Las variables capturadas incluyeron potencia (W), cadencia (RPM), velocidad
+virtual (km/h) y frecuencia cardíaca (BPM) y derivadas.
 
-\subsection{Sincronización temporal (Algoritmo de correlación)}
+\subsection{Sincronización temporal (algoritmo de correlación)}
 El desafío técnico principal en esta etapa fue la sincronización. Dado que el
 video (muestreado a 60-240 Hz) y la telemetría (muestreada a 4 Hz) operan con
 relojes independientes y latencias de transmisión variables, se implementó un
@@ -187,7 +187,7 @@ cadencia para encontrar el desfase óptimo:
 \begin{enumerate}
   \item Se extrajo una señal de cadencia visual ($\omega_{vis}$) mediante el análisis
         de la periodicidad de la coordenada vertical de la rodilla ($y_{knee}$) con la
-        Transformada de Fourier de Tiempo Corto (STFT).
+        transformada de Fourier de tiempo corto (STFT).
   \item Se obtuvo la señal de cadencia del sensor de potencia ($\omega_{sens}$).
   \item Se calculó la correlación cruzada normalizada $R_{vs}(\tau)$ para encontrar el
         desfase óptimo $\tau_{opt}$:
@@ -207,7 +207,7 @@ simple alineación por inicio de movimiento.
 \section{Modelado cinemático y biomecánico}
 \label{sec:modelado_cinematico}
 
-Una vez que fueron extraídas las coordenadas $(x, y)$ de los puntos anatómicos
+Una vez extraídas las coordenadas $(x, y)$ de los puntos anatómicos
 clave mediante la red neuronal, se procedió al modelado cinemático. El objetivo
 de este módulo fue transformar datos posicionales abstractos en métricas
 biomecánicas con significado clínico y deportivo, e integrar modelos físicos
@@ -220,20 +220,20 @@ avanzados.
 \label{subsec:cinematica_angular}
 
 Tras la extracción de las coordenadas articulares mediante la red neuronal, el
-sistema aborda la reconstrucción cinemática. A diferencia de enfoques
+sistema abordó la reconstrucción cinemática. A diferencia de enfoques
 simplistas que calculan ángulos planos entre vectores 2D, este trabajo
-implementa una formulación rigurosa basada en los estándares de la Sociedad
-Internacional de Biomecánica (ISB) para evitar errores
-cinemático y singularidades matemáticas \citep{Wu2002_ISB_Part1}.
+implementó una formulación rigurosa basada en los estándares de la Sociedad
+Internacional de Biomecánica (ISB) para evitar errores cinemáticos y
+singularidades matemáticas \citep{Wu2002_ISB_Part1}.
 
 \subsubsection{Definición de sistemas de coordenadas locales}
 Para garantizar la reproducibilidad clínica y la consistencia física, se
-construyen marcos de referencia ortonormales para cada segmento corporal (fémur
-y tibia), abandonando la geometría euclidiana simple en favor del álgebra
-vectorial tridimensional.
+construyeron marcos de referencia ortonormales para cada segmento corporal
+(fémur y tibia), lo que permitió abandonar la geometría euclidiana simple en
+favor del álgebra vectorial tridimensional.
 
-Para el segmento femoral, definimos el origen $O_f$ en el Centro Articular de
-la Cadera (HJC). Se construye el eje longitudinal $\mathbf{Y}_f$ mediante el
+Para el segmento femoral, se definió el origen $O_f$ en el centro articular de
+la cadera (HJC). Se construyó el eje longitudinal $\mathbf{Y}_f$ mediante el
 vector unitario que conecta el punto medio de los epicóndilos femorales
 ($\mathbf{M}_{FE}$) con el HJC:
 
@@ -241,25 +241,25 @@ vector unitario que conecta el punto medio de los epicóndilos femorales
   \mathbf{Y}_f = \frac{\mathbf{r}_{HJC} - \mathbf{M}_{FE}}{||\mathbf{r}_{HJC} - \mathbf{M}_{FE}||}
 \end{equation}
 
-Para resolver la orientación espacial, se define un eje auxiliar
-$\mathbf{Z}_{temp}$ que une los epicóndilos lateral y medial, lo que permite
-calcular el eje antero-posterior $\mathbf{X}_f$ mediante producto vectorial,
-asegurando la ortogonalidad respecto al plano cuasi-frontal:
+Para resolver la orientación espacial, se definió un eje auxiliar
+$\mathbf{Z}_{temp}$ que une los epicóndilos lateral y medial, lo que permitió
+calcular el eje antero-posterior $\mathbf{X}_f$ mediante producto vectorial, lo
+que aseguró la ortogonalidad respecto al plano cuasi-frontal:
 
 \begin{equation}
   \mathbf{X}_f = \frac{\mathbf{Y}_f \times \mathbf{Z}_{temp}}{||\mathbf{Y}_f \times \mathbf{Z}_{temp}||}, \quad \quad \mathbf{Z}_f = \mathbf{X}_f \times \mathbf{Y}_f
 \end{equation}
 
 De manera análoga, el sistema de coordenadas tibial ($\mathcal{F}_{tibia}$) se
-define con origen en $\mathbf{M}_{FE}$, utilizando el eje transmaleolar para la
-orientación distal .
+definió con origen en $\mathbf{M}_{FE}$, lo que utilizó el eje transmaleolar
+para la orientación distal.
 
 \subsubsection{Cálculo de la matriz de rotación y ángulos de Euler}
-La cinemática angular de la rodilla se obtiene proyectando la orientación del
-marco tibial sobre el espacio vectorial del fémur. Si definimos
+La cinemática angular de la rodilla se obtuvo mediante la proyección de la
+orientación del marco tibial sobre el espacio vectorial del fémur. Se definieron
 ${}^G\mathbf{R}_f$ y ${}^G\mathbf{R}_t$ como las matrices de rotación absoluta
-de fémur y tibia respecto al sistema global, la matriz de orientación relativa
-${}^f\mathbf{R}_t$ se calcula como:
+de fémur y tibia respecto al sistema global, y la matriz de orientación relativa
+${}^f\mathbf{R}_t$ se calculó como:
 
 \begin{equation}
   {}^f\mathbf{R}_t = ({}^G\mathbf{R}_f)^T \cdot {}^G\mathbf{R}_t = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}
@@ -267,73 +267,107 @@ ${}^f\mathbf{R}_t$ se calcula como:
 
 Para descomponer esta matriz en métricas clínicamente significativas, se
 implementó la secuencia de rotación de Grood \& Suntay (Z-X-Y), estándar ISB
-para la rodilla \citep{GroodSuntay1983}. El ángulo de flexión/extensión ($\alpha$), variable
-crítica para la optimización de la altura del sillín, se extrae mediante:
+para la rodilla \citep{GroodSuntay1983}. El ángulo de flexión/extensión
+($\alpha$), variable crítica para la optimización de la altura del sillín, se
+extrajo mediante:
 
 \begin{equation}
   \alpha_{flexion} = \arctan2(-r_{12}, r_{22})
 \end{equation}
 
-Esta formulación desacopla matemáticamente la flexión pura de los movimientos
-parásitos de abducción y rotación axial, proporcionando una señal de entrada
+Esta formulación desacopló matemáticamente la flexión pura de los movimientos
+parásitos de abducción y rotación axial, lo que proporcionó una señal de entrada
 limpia para el algoritmo genético.
 
-\subsubsection{Estimación de estado mediante Filtro de Kalman}
+\subsubsection{Estimación de estado mediante filtro de Kalman}
 Uno de los avances metodológicos de este sistema respecto a la literatura
-convencional es la sustitución del filtrado determinista (Butterworth)  \citep{Winter2009_Biomechanics} por un
-estimador estocástico recursivo. Dado que el modelo de detección de pose
-introduce ruido de alta frecuencia ("jitter") y que el filtrado convencional
-introduce latencia de fase inaceptable para aplicaciones en tiempo real, se
-implementó un Filtro de Kalman Lineal basado en un modelo cinemático de
-Aceleración Angular Constante (CA).
+convencional fue la sustitución del filtrado determinista (Butterworth)
+\citep{Winter2009_Biomechanics} por un estimador estocástico recursivo. Dado que
+el modelo de detección de pose introdujo ruido de alta frecuencia (jitter) y que
+el filtrado convencional introdujo latencia de fase inaceptable para aplicaciones
+en tiempo real, se implementó un filtro de Kalman lineal basado en un modelo
+cinemático de aceleración angular constante (CA).
 
-Para cada grado de libertad articular $\theta$, se define el vector de estado
-$\mathbf{x}_k$ en el instante $k$, el cual incluye explícitamente la velocidad
+Para cada grado de libertad articular $\theta$, se definió el vector de estado
+$\mathbf{x}_k$ en el instante $k$, el que incluyó explícitamente la velocidad
 y aceleración angular necesarias para la etapa dinámica posterior:
 
 \begin{equation}
   \mathbf{x}_k = \begin{bmatrix} \theta_k \\ \dot{\theta}_k \\ \ddot{\theta}_k \end{bmatrix}
 \end{equation}
 
-El modelo de transición de estado a priori, que predice la cinemática en $k$
-basándose en $k-1$ y las ecuaciones de movimiento de Newton, se rige por la
+El modelo de transición de estado a priori, el que predijo la cinemática en $k$
+basándose en $k-1$ y las ecuaciones de movimiento de Newton, se rigió por la
 matriz de transición $\mathbf{F}$:
 
 \begin{equation}
-  \hat{\mathbf{x}}_{k|k-1} = \mathbf{F} \hat{\mathbf{x}}_{k-1|k-1}, \quad \text{donde} \quad \mathbf{F} = \begin{bmatrix} 1 & \Delta t & \frac{1}{2}\Delta t^2 \\ 0 & 1 & \Delta t \\ 0 & 0 & 1 \end{bmatrix}
+  \hat{\mathbf{x}}_{k|k-1} = \mathbf{F} \hat{\mathbf{x}}_{k-1|k-1}
 \end{equation}
 
-La incertidumbre del modelo se gestiona mediante la matriz de covarianza del
-ruido del proceso $\mathbf{Q}$, diseñada para modelar la sobreaceleración
-(\textit{jerk}) como un ruido blanco espectral con densidad $\Phi_s$. Esto
-permite que el filtro se adapte dinámicamente a cambios bruscos de cadencia sin
-perder la suavidad de la señal:
+donde la matriz de transición de estado se define como:
+
+\begin{equation}
+  \mathbf{F} = 
+  \begin{bmatrix} 
+    1 & \Delta t & \dfrac{1}{2}\Delta t^2 \\ 
+    0 & 1 & \Delta t \\
+    0 & 0 & 1 
+  \end{bmatrix}
+\end{equation}
+
+La incertidumbre del modelo se gestionó mediante la matriz de covarianza del
+ruido del proceso $\mathbf{Q}$, la que fue diseñada para modelar la
+sobreaceleración (\textit{jerk}) como un ruido blanco espectral con densidad
+$\Phi_s$. Esto permitió que el filtro se adaptara dinámicamente a cambios bruscos
+de cadencia sin perder la suavidad de la señal:
 
 \begin{equation}
   \mathbf{Q} = \Phi_s \begin{bmatrix} \frac{\Delta t^5}{20} & \frac{\Delta t^4}{8} & \frac{\Delta t^3}{6} \\ \frac{\Delta t^4}{8} & \frac{\Delta t^3}{3} & \frac{\Delta t^2}{2} \\ \frac{\Delta t^3}{6} & \frac{\Delta t^2}{2} & \Delta t \end{bmatrix}
 \end{equation}
 
-Finalmente, la actualización a posteriori corrige la predicción utilizando la
-medición ruidosa de la red neuronal $\mathbf{z}_k$, ponderada por la Ganancia
-de Kalman óptima $\mathbf{K}_k$. Esto resulta en vectores
+Finalmente, la actualización a posteriori corrigió la predicción mediante el uso
+de la medición ruidosa de la red neuronal $\mathbf{z}_k$, la que fue ponderada
+por la ganancia de Kalman óptima $\mathbf{K}_k$. Esto resultó en vectores
 cinemáticos $(\theta, \dot{\theta}, \ddot{\theta})$ suaves y sincronizados en
-fase, listos para alimentar el modelo de dinámica inversa.
+fase, los que fueron empleados para alimentar el modelo de dinámica inversa.
 
 \subsection{Estimación aerodinámica ($C_d A$)}
 En esta etapa se predijo el comportamiento del sistema ciclista-bicicleta bajo
 diferentes configuraciones geométricas sin necesidad de intervención física en
-túnel de viento. El sistema estimó el Área Frontal Proyectada ($A_{proj}$)
+túnel de viento. El sistema estimó el área frontal proyectada ($A_{proj}$)
 utilizando una red de segmentación semántica sobre la vista lateral del
 ciclista.
 
 Aunque la vista lateral no captura directamente el área frontal, se aplicaron
-modelos de regresión multivariable (basados en estudios de Bassett y Heil) los
-cuales correlacionaron la pose sagital con el área frontal efectiva. El modelo
+modelos basados en los estudios de Bassett et al.
+\citep{Bassett1999_HourRecord} y Heil \citep{Heil2001_BodyMassScaling}, los que
+correlacionaron la pose sagital con el área frontal efectiva. El modelo
 consideró la altura del torso y el ángulo de apertura de la cadera:
 
 \begin{equation}
   A_{proj} \approx \alpha \cdot H_{torso} \cdot \sin(\theta_{cadera}) + \beta \cdot m_{ciclista}^{0.425} + \gamma
 \end{equation}
+
+donde los parámetros del modelo representan:
+
+\begin{itemize}
+  \item $\alpha$: coeficiente de contribución postural que pondera el impacto de la
+        altura del torso y la apertura de la cadera en el área frontal. Este parámetro
+        captura la geometría del ciclista en función de su posición.
+  \item $H_{torso}$: altura vertical del torso medida desde la cadera hasta el hombro
+        en la vista lateral, expresada en metros.
+  \item $\theta_{cadera}$: ángulo de apertura de la cadera formado entre el torso y el
+        muslo. El término $\sin(\theta_{cadera})$ modela la proyección del torso sobre
+        el plano frontal.
+  \item $\beta$: coeficiente antropométrico que relaciona la masa corporal con el área
+        frontal mediante una ley de potencia alométrica.
+  \item $m_{ciclista}$: masa corporal del ciclista en kilogramos.
+  \item El exponente $0.425$ proviene de las leyes de escalamiento alométrico de Heil,
+        las que relacionan el área de superficie corporal con la masa mediante la
+        fórmula de Du Bois.
+  \item $\gamma$: término de sesgo (intercepción) que representa la contribución
+        constante de la bicicleta y el equipamiento del ciclista al área frontal total.
+\end{itemize}
 
 Esto permitió cuantificar el coste aerodinámico ($P_{aero} \propto v^3 \cdot
   A_{proj}$) de cambios posturales, como bajar la altura del manillar ($Stack$).
@@ -351,24 +385,25 @@ actividad restringida predominantemente al plano sagital, se formuló un modelo
 de dinámica inversa plana (2D) para calcular los torques netos
 articulares.
 
-Se empleó el método de Newton-Euler Recursivo \citep{Winter2009_Biomechanics}, resolviendo las ecuaciones de
-movimiento desde el segmento distal (pie/pedal) hacia el proximal (cadera).
-Este enfoque permite propagar las fuerzas de reacción del suelo medidas por los
-sensores de potencia a través de la cadena cinética del ciclista.
+Se empleó el método de Newton-Euler recursivo \citep{Winter2009_Biomechanics},
+el que resolvió las ecuaciones de movimiento desde el segmento
+distal (pie/pedal) hacia el proximal (cadera). Este enfoque permitió propagar
+las fuerzas de reacción del suelo medidas por los sensores de potencia a través
+de la cadena cinética del ciclista.
 
 \subsubsection{Definición de parámetros inerciales}
 Para cada segmento $i$ (pie, pierna, muslo), se modelaron las propiedades
 inerciales basadas en tablas antropométricas estándar escaladas a la masa del
-sujeto. Se definen $m_i$ como la masa del segmento, $I_i$ como el momento de
+sujeto. Se definieron $m_i$ como la masa del segmento, $I_i$ como el momento de
 inercia centroidal y $\mathbf{a}_{cm, i} = [a_{ix}, a_{iy}]^T$ como la
-aceleración lineal del centro de masas, derivada de la cinemática filtrada en
-la sección anterior.
+aceleración lineal del centro de masas, la que fue derivada de la cinemática
+filtrada en la sección anterior.
 
-\subsubsection{Dinámica del segmento distal (Pie)}
-El análisis inicia en la interfaz pedal-pie. Las fuerzas externas
-$\mathbf{F}_{pedal} = [F_{px}, F_{py}]^T$ se descomponen en el sistema global.
-Aplicando la segunda ley de Newton, se calculan las fuerzas de reacción en el
-tobillo ($\mathbf{F}_{ankle}$):
+\subsubsection{Dinámica del segmento distal (pie)}
+El análisis inició en la interfaz pedal-pie. Las fuerzas externas
+$\mathbf{F}_{pedal} = [F_{px}, F_{py}]^T$ se descompusieron en el sistema
+global. Mediante la aplicación de la segunda ley de Newton, se calcularon las
+fuerzas de reacción en el tobillo ($\mathbf{F}_{ankle}$):
 
 \begin{equation}
   F_{ankle\_x} = m_{foot} a_{foot\_x} - F_{px}
@@ -377,50 +412,83 @@ tobillo ($\mathbf{F}_{ankle}$):
   F_{ankle\_y} = m_{foot} (a_{foot\_y} + g) - F_{py}
 \end{equation}
 
-Para el equilibrio de momentos, se aplica la ecuación de Euler respecto al
+Para el equilibrio de momentos, se aplicó la ecuación de Euler respecto al
 centro de masas (CM) para eliminar el término de aceleración lineal del CM. El
-torque neto muscular en el tobillo $M_{ankle}$ se despeja considerando los
-momentos generados por las fuerzas de reacción y la inercia rotacional del
-segmento:
+torque neto muscular en el tobillo $M_{ankle}$ se despejó mediante la
+consideración de los momentos generados por las fuerzas de reacción y la inercia
+rotacional del segmento. El momento inercial y el momento del pedal se expresan
+como:
 
 \begin{equation}
-  \begin{aligned}
-    M_{ankle} = & \ I_{foot} \alpha_{foot} - M_{pedal}                              \\
-                & - (x_{ankle}-x_{cm}) F_{ankle_y} + (y_{ankle}-y_{cm}) F_{ankle_x} \\
-                & - (x_{pedal}-x_{cm}) F_{py} + (y_{pedal}-y_{cm}) F_{px}
-  \end{aligned}
+  M_{inercial} = I_{foot} \alpha_{foot} - M_{pedal}
 \end{equation}
 
-\subsubsection{Propagación recursiva (Pierna y Muslo)}
-Siguiendo el principio de acción y reacción (Tercera Ley de Newton), las
-fuerzas y momentos ejercidos por el pie sobre la pierna son
+Los momentos generados por las fuerzas de reacción en el tobillo respecto al CM
+del pie son:
+
+\begin{equation}
+  M_{ankle\_reaction} = -(x_{ankle}-x_{cm}) F_{ankle_y} + (y_{ankle}-y_{cm}) F_{ankle_x}
+\end{equation}
+
+Los momentos generados por las fuerzas en el pedal respecto al CM del pie son:
+
+\begin{equation}
+  M_{pedal\_reaction} = -(x_{pedal}-x_{cm}) F_{py} + (y_{pedal}-y_{cm}) F_{px}
+\end{equation}
+
+Finalmente, el torque neto en el tobillo se calcula como:
+
+\begin{equation}
+  M_{ankle} = M_{inercial} + M_{ankle\_reaction} + M_{pedal\_reaction}
+\end{equation}
+
+\subsubsection{Propagación recursiva (pierna y muslo)}
+Siguiendo el principio de acción y reacción (tercera ley de Newton), las
+fuerzas y momentos ejercidos por el pie sobre la pierna fueron
 $-\mathbf{F}_{ankle}$ y $-M_{ankle}$. Para el segmento de la pierna (shank),
-las ecuaciones de equilibrio en la rodilla se formulan como:
+las ecuaciones de equilibrio en la rodilla se formularon como:
 
 \begin{equation}
   \mathbf{F}_{knee} = m_{shank} (\mathbf{a}_{shank} - \mathbf{g}) + \mathbf{F}_{ankle}
 \end{equation}
 
 El momento neto en la rodilla $M_{knee}$, variable crítica que el optimizador
-busca minimizar para reducir el riesgo de lesión patelar, se calcula sumando
-los torques inerciales y los producidos por las fuerzas articulares distales y
-proximales respecto al CM de la pierna:
+buscó minimizar para reducir el riesgo de lesión patelar, se calculó mediante la
+suma de los torques inerciales y los producidos por las fuerzas articulares
+distales y proximales respecto al CM de la pierna. El momento inercial de la
+pierna y la transmisión del momento del tobillo se expresan como:
 
 \begin{equation}
-  \begin{aligned}
-    M_{knee} = & \ I_{shank} \alpha_{shank} + M_{ankle}                                    \\
-               & - [(x_{knee}-x_{cm}) F_{knee_y} - (y_{knee}-y_{cm}) F_{knee_x}]           \\
-               & - [(x_{ankle}-x_{cm}) (-F_{ankle_y}) - (y_{ankle}-y_{cm}) (-F_{ankle_x})]
-  \end{aligned}
+  M_{inercial\_shank} = I_{shank} \alpha_{shank} + M_{ankle}
 \end{equation}
 
-Este proceso se repite recursivamente para el segmento del muslo (thigh) para
+Los momentos generados por las fuerzas de reacción en la rodilla respecto al CM
+de la pierna son:
+
+\begin{equation}
+  M_{knee\_reaction} = -(x_{knee}-x_{cm}) F_{knee_y} + (y_{knee}-y_{cm}) F_{knee_x}
+\end{equation}
+
+Los momentos generados por las fuerzas de reacción en el tobillo respecto al CM
+de la pierna son:
+
+\begin{equation}
+  M_{ankle\_shank} = (x_{ankle}-x_{cm}) F_{ankle_y} - (y_{ankle}-y_{cm}) F_{ankle_x}
+\end{equation}
+
+Finalmente, el momento neto en la rodilla se calcula como:
+
+\begin{equation}
+  M_{knee} = M_{inercial\_shank} + M_{knee\_reaction} + M_{ankle\_shank}
+\end{equation}
+
+Este proceso se repitió recursivamente para el segmento del muslo (thigh) para
 obtener el torque de cadera $M_{hip}$.
 
-\subsubsection{Cálculo de Potencia Articular}
-Finalmente, la eficiencia biomecánica se cuantifica mediante la potencia
+\subsubsection{Cálculo de potencia articular}
+Finalmente, la eficiencia biomecánica se cuantificó mediante la potencia
 mecánica instantánea $P_{joint}$ generada o absorbida en cada articulación.
-Esta métrica integra la salida cinética con la cinemática, calculándose como el
+Esta métrica integró la salida cinética con la cinemática, y se calculó como el
 producto escalar del momento neto y la velocidad angular relativa de la
 articulación $\omega_{joint}$:
 
@@ -428,10 +496,23 @@ articulación $\omega_{joint}$:
   P_{joint}(t) = M_{joint}(t) \cdot (\dot{\theta}_{proximal}(t) - \dot{\theta}_{distal}(t))
 \end{equation}
 
-La integral de esta potencia a lo largo del ciclo de pedaleo constituye la
-función objetivo $J_{power}$ que el algoritmo genético minimiza, buscando la
-configuración geométrica que permita generar los mismos vatios externos con el
-menor coste mecánico interno.
+La integral de esta potencia a lo largo del ciclo de pedaleo constituyó la
+función objetivo $J_{power}$ que el algoritmo genético minimizó, lo que permitió
+buscar la configuración geométrica que permitió generar los mismos vatios
+externos con el menor coste mecánico interno.
+
+La figura \ref{fig:gemelo_digital_biomecanico} presenta una visualización del
+gemelo digital biomecánico implementado, donde se ilustran los vectores de
+fuerzas de reacción ($\mathbf{F}_{pedal}$), momentos articulares
+($M_{ankle}$, $M_{knee}$, $M_{hip}$), velocidades angulares ($\omega_{knee}$)
+y el ángulo de flexión ($\alpha$) calculados mediante el método de dinámica
+inversa descrito.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1.0\textwidth]{Figures/esqueleto.png}
+  \caption{Gemelo digital biomecánico del ciclista mostrando el análisis de dinámica inversa plana.}
+  \label{fig:gemelo_digital_biomecanico}
+\end{figure}
 
 \section{Modelado del sistema de decisión}
 \label{sec:modelado_sistema}
@@ -444,11 +525,11 @@ Para la etapa de percepción, se implementó el modelo \textit{MediaPipe
   BlazePose}. Tal como se justificó en el marco teórico, este modelo ofrece una
 topología de 33 puntos que incluye marcadores específicos para los pies. La red
 neuronal procesó el flujo de video cuadro a cuadro, y se infirió la posición
-espacial del esqueleto del ciclista, configurando parámetros de confianza de
+espacial del esqueleto del ciclista mediante la configuración de parámetros de confianza de
 detección y seguimiento superiores a 0.5.
 
 Para adaptar la red de propósito general al contexto del ciclismo, se
-implementó un filtro de Prior Cinemático. Dado que el ciclismo con calas
+implementó un filtro de prior cinemático. Dado que el ciclismo con calas
 automáticas constituye una cadena cinética cerrada, la longitud de los
 segmentos óseos debe permanecer invariante. El sistema penalizó y corrigió
 detecciones que violaron la antropometría del sujeto:
