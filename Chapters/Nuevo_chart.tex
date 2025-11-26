@@ -1,21 +1,18 @@
+\section{Modelado del sistema de decisión: arquitectura de optimización estocástica}
 
-\section{Modelado del Sistema de Decisión: Arquitectura de Optimización Estocástica}
-
-La sección de "Modelado del sistema de decisión" constituye el núcleo
-inteligente de la propuesta. Tras las etapas de percepción (visión artificial)
-y modelado físico (dinámica inversa) descritas en la sección 3.4, el sistema
-dispone de un "Gemelo Digital" del ciclista: una representación matemática que
+La sección de Modelado del sistema de decisión constituye el núcleo
+inteligente de la propuesta. Tras las etapas de percepción y
+modelado físico descritas en la sección 3.4, el sistema
+dispone de un gemelo digital del ciclista: una representación matemática que
 incluye su cinemática filtrada por Kalman, sus torques articulares y su área
 frontal estimada.
 
 Sin embargo, estos datos son descriptivos, no prescriptivos. El desafío técnico
 de esta sección es transformar ese diagnóstico en una configuración óptima de
 la bicicleta. Este problema se formula formalmente como un problema de
-\textit{Optimización de Diseño de Ingeniería} (Engineering Design
-Optimization), caracterizado por ser multi-objetivo, no lineal, no convexo y
+\textit{optimización de diseño de ingeniería}, caracterizado por ser multiobjetivo, no lineal, no convexo y
 sujeto a restricciones estrictas. A continuación, se detalla la fundamentación
 matemática y la implementación algorítmica.
-
 
 \usepackage{subcaption}
 \usepackage{graphicx}
@@ -26,35 +23,34 @@ matemática y la implementación algorítmica.
     \begin{subfigure}[b]{0.32\textwidth}
         \centering
         \includegraphics[width=\textwidth]{paso1_padres.png}
-        \caption{Población Inicial}
+        \caption{Población inicial}
     \end{subfigure}
     \hfill
     % Segunda imagen: El Cruce
     \begin{subfigure}[b]{0.32\textwidth}
         \centering
         \includegraphics[width=\textwidth]{paso2_cruce.png}
-        \caption{Operador de Cruce}
+        \caption{Operador de cruce}
     \end{subfigure}
     \hfill
     % Tercera imagen: Mutación/Final
     \begin{subfigure}[b]{0.32\textwidth}
         \centering
         \includegraphics[width=\textwidth]{paso3_final.png}
-        \caption{Mutación y Evaluación}
+        \caption{Mutación y evaluación}
     \end{subfigure}
        
     \caption{Secuencia de evolución del algoritmo genético biomecánico.}
     \label{fig:secuencia_ag}
 \end{figure}
 
-\subsection{Fundamentación Matemática del Espacio de Búsqueda}
+\subsection{Fundamentación matemática del espacio de búsqueda}
 
 Para aplicar cualquier técnica de optimización, es imperativo definir
-rigurosamente el espacio de búsqueda. En el contexto del ajuste biomecánico
-(\textit{bike fitting}), las variables de decisión no son arbitrarias;
+rigurosamente el espacio de búsqueda. En el contexto del ajuste biomecánico, las variables de decisión no son arbitrarias;
 corresponden a los grados de libertad mecánicos de la bicicleta.
 
-\subsubsection{Definición del Vector de Estado (Genotipo)}
+\subsubsection{Definición del vector de estado}
 
 Se define el vector de variables de decisión $\mathbf{x} \in \mathbb{R}^n$ que
 representa la configuración geométrica de la bicicleta. Aunque una bicicleta
@@ -69,18 +65,16 @@ plano sagital. Por tanto, el vector $\mathbf{x}$ se define como:
 
 Donde:
 \begin{itemize}
-    \item $h_{\text{sillin}}$ (Altura del sillín): Distancia vertical desde el centro del eje de pedalier hasta la superficie superior del sillín. Esta variable gobierna la extensión de la rodilla y el tobillo.
-    \item $r_{\text{sillin}}$ (Retroceso del sillín): Distancia horizontal desde la vertical del eje de pedalier hasta la punta del sillín. Determina la distribución de peso y el ángulo de cierre de la cadera.
-    \item $h_{\text{manillar}}$ (Stack): Altura vertical del manillar. Afecta directamente la flexión del torso y, consecuentemente, la aerodinámica y la tensión lumbar.
-    \item $a_{\text{manillar}}$ (Reach/Alcance): Distancia horizontal al manillar. Modula el ángulo del hombro y la extensión de los brazos.
+    \item $h_{\text{sillin}}$: distancia vertical desde el centro del eje de pedalier hasta la superficie superior del sillín. Esta variable gobierna la extensión de la rodilla y el tobillo.
+    \item $r_{\text{sillin}}$: distancia horizontal desde la vertical del eje de pedalier hasta la punta del sillín. Determina la distribución de peso y el ángulo de cierre de la cadera.
+    \item $h_{\text{manillar}}$: altura vertical del manillar. Afecta directamente la flexión del torso y, consecuentemente, la aerodinámica y la tensión lumbar.
+    \item $a_{\text{manillar}}$: distancia horizontal al manillar. Modula el ángulo del hombro y la extensión de los brazos.
 \end{itemize}
 
-\subsubsection{Restricciones del Espacio de Diseño (Constraints)}
+\subsubsection{Restricciones del espacio de diseño}
 
 El espacio de búsqueda $\Omega$ no es infinito. Está acotado por límites
-físicos (la longitud de la tija del sillín, el tamaño del cuadro) y
-antropométricos. Estas se modelan como \textit{restricciones de caja (box
-    constraints)}, que definen el hiperrectángulo de soluciones factibles:
+físicos y antropométricos. Estas se modelan como \textit{restricciones de caja}, que definen el hiperrectángulo de soluciones factibles:
 
 \begin{equation}
     \Omega = \{ \mathbf{x} \in \mathbb{R}^4 \mid L_{\min,i} \leq x_i \leq L_{\max,i}, \quad \forall i=1,\dots,4 \}
@@ -88,30 +82,26 @@ antropométricos. Estas se modelan como \textit{restricciones de caja (box
 
 Los límites $L_{\min}$ y $L_{\max}$ se determinan dinámicamente en función de
 la bicicleta del usuario, asegurando que el algoritmo no proponga soluciones
-físicamente imposibles de implementar (e.g., una altura de sillín que exceda la
-longitud del tubo del asiento).
+físicamente imposibles de implementar.
 
-\subsection{Formulación de las Funciones Objetivo (Fenotipo)}
+\subsection{Formulación de las funciones objetivo}
 
 La evaluación de la calidad de una configuración $\mathbf{x}$ es un problema
-intrínsecamente \textit{Multi-Objetivo (MOO)}. En el ciclismo de rendimiento,
-no existe una única solución "perfecta"; existe un compromiso
-(\textit{trade-off}) inherente entre tres factores competitivos: confort,
-potencia y aerodinámica. Mejorar uno suele ir en detrimento de los otros (e.g.,
-bajar el manillar mejora la aerodinámica pero empeora el confort lumbar y puede
-restringir la respiración, afectando la potencia).
+intrínsecamente \textit{multiobjetivo}. En el ciclismo de rendimiento,
+no existe una única solución perfecta; existe un compromiso
+inherente entre tres factores competitivos: confort,
+potencia y aerodinámica. Mejorar uno suele ir en detrimento de los otros.
 
 El sistema modela este conflicto mediante tres funciones de coste distintas
 $J(\mathbf{x})$, que el optimizador busca minimizar simultáneamente.
 
-\subsubsection{A. Función de Coste de Confort ($J_{\text{comfort}}$): Modelado de Estrés Tisular}
+\subsubsection{A. Función de coste de confort}
 
-La función de confort no mide el "placer", sino la ausencia de estrés
+La función de confort no mide el placer, sino la ausencia de estrés
 patológico en los tejidos. Biomecánicamente, las articulaciones humanas tienen
-un Rango de Movimiento (ROM) seguro. Al acercarse a los límites de este rango,
+un rango de movimiento seguro. Al acercarse a los límites de este rango,
 la tensión pasiva en ligamentos y tendones aumenta exponencialmente,
-incrementando el riesgo de lesión (e.g., tendinitis rotuliana por sillín bajo,
-o síndrome de la banda iliotibial por sillín alto).
+incrementando el riesgo de lesión.
 
 Para modelar matemáticamente este comportamiento, se ha diseñado una
 \textit{función de penalización de barrera suave}. A diferencia de las
@@ -122,9 +112,7 @@ Sea $\Theta(\mathbf{x}) = [\theta_{\text{rodilla}}, \theta_{\text{cadera}},
     \theta_{\text{hombro}}, \theta_{\text{tobillo}}]$ el vector de ángulos
 articulares máximos/mínimos resultantes de simular el pedaleo con la
 configuración $\mathbf{x}$. Para cada ángulo $\theta_k$, definimos un rango
-seguro $[\theta_{\min, k}, \theta_{\max, k}]$ basado en la literatura clínica
-(e.g., Holmes et al. establecen $25^\circ-35^\circ$ de flexión de rodilla en el
-punto muerto inferior).
+seguro $[\theta_{\min, k}, \theta_{\max, k}]$ basado en la literatura clínica.
 
 La función de coste $J_{\text{comfort}}$ se define como la suma de las
 desviaciones cuadráticas fuera de estos rangos:
@@ -133,18 +121,18 @@ desviaciones cuadráticas fuera de estos rangos:
     J_{\text{comfort}}(\mathbf{x}) = \sum_{k \in \text{articulaciones}} w_k \cdot \left( \max(0, \theta_{\min,k} - \theta_k(\mathbf{x}))^2 + \max(0, \theta_k(\mathbf{x}) - \theta_{\max,k})^2 \right)
 \end{equation}
 
-Insight Teórico: El uso del cuadrado $(\cdot)^2$ es deliberado. En biomecánica, el daño tisular no es lineal con la deformación; pequeños excesos son tolerables, pero grandes desviaciones son catastróficas. La función cuadrática penaliza desproporcionadamente las grandes violaciones, forzando al algoritmo a priorizar la corrección de posturas peligrosas sobre el refinamiento de posturas ya aceptables.
+Insight teórico: El uso del cuadrado $(\cdot)^2$ es deliberado. En biomecánica, el daño tisular no es lineal con la deformación; pequeños excesos son tolerables, pero grandes desviaciones son catastróficas. La función cuadrática penaliza desproporcionadamente las grandes violaciones, forzando al algoritmo a priorizar la corrección de posturas peligrosas sobre el refinamiento de posturas ya aceptables.
 
-Implementación: Los pesos $w_k$ permiten priorizar articulaciones críticas. Por ejemplo, la rodilla ($w_{\text{rodilla}}$) recibe un peso mayor que el codo, dado que la rodilla es el sitio más frecuente de lesiones por uso excesivo en ciclismo.
+Implementación: Los pesos $w_k$ permiten priorizar articulaciones críticas. Por ejemplo, la rodilla recibe un peso mayor que el codo, dado que la rodilla es el sitio más frecuente de lesiones por uso excesivo en ciclismo.
 
-\subsubsection{B. Función de Eficiencia Biomecánica ($J_{\text{power}}$): Minimización del Coste Metabólico}
+\subsubsection{B. Función de eficiencia biomecánica}
 
 El objetivo $J_{\text{power}}$ busca maximizar la eficiencia mecánica. Dado que
-el sistema no puede medir el consumo de oxígeno ($VO_2$) directamente, utiliza
-un \textit{proxy biomecánico}: la minimización de los momentos articulares
+el sistema no puede medir el consumo de oxígeno directamente, utiliza
+un proxy biomecánico: la minimización de los momentos articulares
 netos necesarios para producir una potencia objetivo.
 
-Basándose en la Dinámica Inversa calculada en la sección 3.4, para una
+Basándose en la dinámica inversa calculada en la sección 3.4, para una
 configuración $\mathbf{x}$ dada, se calcula el perfil de torques articulares
 $M(t)$ a lo largo del ciclo de pedaleo. La función de coste se define como la
 integral del torque al cuadrado:
@@ -153,18 +141,18 @@ integral del torque al cuadrado:
     J_{\text{power}}(\mathbf{x}) = \int_{0}^{T_{\text{ciclo}}} \left( \alpha \|M_{\text{cadera}}(t, \mathbf{x})\|^2 + \beta \|M_{\text{rodilla}}(t, \mathbf{x})\|^2 \right) dt
 \end{equation}
 
-Fundamentación Fisiológica: Esta formulación se deriva de la relación fuerza-fatiga. Las unidades motoras musculares siguen el principio de tamaño de Henneman: las fibras tipo II (rápidas, potentes pero fatigables) se reclutan solo cuando la demanda de fuerza es alta. Al minimizar la suma de los torques al cuadrado, el sistema busca configuraciones que distribuyan la carga de manera óptima, minimizando los picos de fuerza y favoreciendo el uso de fibras tipo I (lentas, oxidativas y resistentes a la fatiga).
+Fundamentación fisiológica: Esta formulación se deriva de la relación fuerza-fatiga. Las unidades motoras musculares siguen el principio de tamaño de Henneman: las fibras tipo II se reclutan solo cuando la demanda de fuerza es alta. Al minimizar la suma de los torques al cuadrado, el sistema busca configuraciones que distribuyan la carga de manera óptima, minimizando los picos de fuerza y favoreciendo el uso de fibras tipo I.
 
-Efecto en la Geometría: Matemáticamente, esto favorece configuraciones que optimizan los brazos de palanca efectivos de los músculos extensores (cuádriceps y glúteos) en la fase de potencia (fase de las 12 a las 5 en las manecillas del reloj), permitiendo generar los mismos vatios en el pedal con menor tensión muscular interna.
+Efecto en la geometría: Matemáticamente, esto favorece configuraciones que optimizan los brazos de palanca efectivos de los músculos extensores en la fase de potencia, permitiendo generar los mismos vatios en el pedal con menor tensión muscular interna.
 
-\subsubsection{C. Función de Resistencia Aerodinámica ($J_{\text{aero}}$): Aproximación Virtual}
+\subsubsection{C. Función de resistencia aerodinámica}
 
 En el ciclismo de ruta y triatlón, la resistencia aerodinámica constituye el
-70-90\% de la resistencia total a velocidades de competición ($>30$ km/h).
+70-90\% de la resistencia total a velocidades de competición.
 Ignorar este factor llevaría a soluciones biomecánicamente cómodas pero
-competitivamente inviables (posturas muy erguidas).
+competitivamente inviables.
 
-El modelo de estimación descrito en la Sección 3.4.2 proporciona el área
+El modelo de estimación descrito en la sección 3.4.2 proporciona el área
 frontal proyectada $A_{\text{proj}}(\mathbf{x})$. La función de coste es
 directa:
 
@@ -174,53 +162,53 @@ directa:
 
 Donde $\theta_{\text{torso}}$ es el ángulo de inclinación del tronco.
 
-Conflicto de Objetivos: Aquí surge el principal conflicto de optimización. Minimizar $J_{\text{aero}}$ implica bajar $h_{\text{manillar}}$ (torso horizontal), lo que típicamente aumenta $J_{\text{comfort}}$ (mayor tensión lumbar) y puede aumentar $J_{\text{power}}$ (cierre excesivo del ángulo de cadera, restringiendo la acción del glúteo). El algoritmo debe navegar este compromiso.
+Conflicto de objetivos: Aquí surge el principal conflicto de optimización. Minimizar $J_{\text{aero}}$ implica bajar $h_{\text{manillar}}$, lo que típicamente aumenta $J_{\text{comfort}}$ y puede aumentar $J_{\text{power}}$. El algoritmo debe navegar este compromiso.
 
-\subsection{Selección y Diseño del Algoritmo de Optimización}
+\subsection{Selección y diseño del algoritmo de optimización}
 
 Para resolver el problema de minimizar el vector $\mathbf{J} =
     [J_{\text{comfort}}, J_{\text{power}}, J_{\text{aero}}]^T$, se evaluaron
-diversas familias de algoritmos. La elección de un Algoritmo Genético
-    (AG) se justifica por la naturaleza de la superficie de respuesta del problema
+diversas familias de algoritmos. La elección de un \textit{algoritmo genético}
+    se justifica por la naturaleza de la superficie de respuesta del problema
 biomecánico.
 
-\subsubsection{Análisis del Paisaje de Aptitud (Fitness Landscape Analysis)}
+\subsubsection{Análisis del paisaje de aptitud}
 
 \begin{itemize}
-    \item No Convexidad y Multimodalidad: La relación entre las coordenadas de la bicicleta y la eficiencia muscular es compleja. Existen múltiples óptimos locales. Por ejemplo, una altura de sillín puede ser óptima para la rodilla pero subóptima para el tobillo. Un método basado en gradiente (como el Descenso de Gradiente o Newton-Raphson) correría el riesgo de quedar atrapado en un mínimo local, convergiendo a una solución subóptima. Los AG, al trabajar con una población de soluciones, realizan una búsqueda global más robusta.
-    \item No Diferenciabilidad: Las funciones de confort contienen operadores lógicos (max, if) y discontinuidades derivadas de las restricciones anatómicas. El cálculo de derivadas (Jacobianos o Hessianos) necesarios para métodos deterministas es numéricamente inestable o imposible en estos puntos de quiebre. El AG es un método de orden cero, lo que lo hace ideal para funciones objetivo "caja negra".
-    \item Tolerancia al Ruido: Los datos de entrada provienen de una red neuronal de visión por computador y sensores inalámbricos, que inherentemente contienen ruido gaussiano. Los AG son notoriamente robustos al ruido estocástico en la evaluación de la función de aptitud.
+    \item No convexidad y multimodalidad: La relación entre las coordenadas de la bicicleta y la eficiencia muscular es compleja. Existen múltiples óptimos locales. Por ejemplo, una altura de sillín puede ser óptima para la rodilla pero subóptima para el tobillo. Un método basado en gradiente correría el riesgo de quedar atrapado en un mínimo local, convergiendo a una solución subóptima. Los algoritmos genéticos, al trabajar con una población de soluciones, realizan una búsqueda global más robusta.
+    \item No diferenciabilidad: Las funciones de confort contienen operadores lógicos y discontinuidades derivadas de las restricciones anatómicas. El cálculo de derivadas necesarios para métodos deterministas es numéricamente inestable o imposible en estos puntos de quiebre. El algoritmo genético es un método de orden cero, lo que lo hace ideal para funciones objetivo caja negra.
+    \item Tolerancia al ruido: Los datos de entrada provienen de una red neuronal de visión por computador y sensores inalámbricos, que inherentemente contienen ruido gaussiano. Los algoritmos genéticos son notoriamente robustos al ruido estocástico en la evaluación de la función de aptitud.
 \end{itemize}
 
-\subsubsection{Arquitectura del Algoritmo Genético Implementado}
+\subsubsection{Arquitectura del algoritmo genético implementado}
 
-Se diseñó una variante específica del AG conocida como Algoritmo
-    Genético de Codificación Real (RCGA). A diferencia de los AG clásicos que
-utilizan cadenas de bits (0 y 1), el RCGA opera directamente con vectores de
+Se diseñó una variante específica del algoritmo conocida como \textit{algoritmo
+    genético de codificación real}. A diferencia de los algoritmos clásicos que
+utilizan cadenas de bits, este opera directamente con vectores de
 números flotantes.
 
 \begin{table}[h]
     \centering
-    \caption{Configuración de Operadores del Algoritmo Genético}
+    \caption{Configuración de operadores del algoritmo genético}
     \label{tab:configuracion_ag}
     \begin{tabular}{p{0.2\textwidth} p{0.25\textwidth} p{0.45\textwidth}}
         \toprule
-        Componente      & Selección                 & Justificación Técnica                                                                                                                                      \\
+        Componente      & Selección                 & Justificación técnica                                                                                                                                      \\
         \midrule
-        Representación           & Vector Real (Floating Point)       & Evita la pérdida de precisión por discretización y el problema de los "abismos de Hamming" al tratar variables continuas métricas (mm).                             \\
-        Inicialización           & Muestreo de Hipercubo Latino (LHS) & Garantiza una cobertura estadística uniforme del espacio de búsqueda $\Omega$ en la generación inicial, superior al muestreo aleatorio simple.                      \\
-        Selección                & Torneo Binario ($k=2$)             & Ofrece un control preciso de la presión selectiva. Permite mantener diversidad genética (evitando convergencia prematura) y es computacionalmente eficiente $O(N)$. \\
-        Cruce (Crossover)        & Simulated Binary Crossover (SBX)   & Diseñado para dominios continuos. Imita la distribución de probabilidad del cruce de un punto, respetando la correlación entre variables. Probabilidad $p_c=0.9$.   \\
-        Mutación                 & Polinómica                         & Introduce pequeñas perturbaciones locales para el ajuste fino (\textit{fine-tuning}). Crítico para escapar de óptimos locales planos. Probabilidad $p_m=1/L$.       \\
-        Elitismo                 & Estricto (Top 1)                   & Garantiza que la mejor solución encontrada nunca se pierda, asegurando matemáticamente la no-regresión de la aptitud.                                               \\
-        Gestión de Restricciones & Penalización de Muerte Súbita      & Si una solución viola una restricción geométrica dura, se le asigna un fitness infinito, eliminándola del acervo genético.                                          \\
+        Representación           & Vector real        & Evita la pérdida de precisión por discretización y el problema de los abismos de Hamming al tratar variables continuas métricas.                             \\
+        Inicialización           & Muestreo de hipercubo latino & Garantiza una cobertura estadística uniforme del espacio de búsqueda $\Omega$ en la generación inicial, superior al muestreo aleatorio simple.                      \\
+        Selección                & Torneo binario             & Ofrece un control preciso de la presión selectiva. Permite mantener diversidad genética y es computacionalmente eficiente $O(N)$. \\
+        Cruce        & Simulated Binary Crossover   & Diseñado para dominios continuos. Imita la distribución de probabilidad del cruce de un punto, respetando la correlación entre variables. Probabilidad $p_c=0.9$.   \\
+        Mutación                 & Polinómica                         & Introduce pequeñas perturbaciones locales para el ajuste fino. Crítico para escapar de óptimos locales planos. Probabilidad $p_m=1/L$.       \\
+        Elitismo                 & Estricto                   & Garantiza que la mejor solución encontrada nunca se pierda, asegurando matemáticamente la no regresión de la aptitud.                                               \\
+        Gestión de restricciones & Penalización de muerte súbita      & Si una solución viola una restricción geométrica dura, se le asigna un fitness infinito, eliminándola del acervo genético.                                          \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\subsubsection{Estrategia de Escalarización (Weighted Sum Approach)}
+\subsubsection{Estrategia de escalarización}
 
-Aunque el problema es multi-objetivo, para el despliegue final se requiere una
+Aunque el problema es multiobjetivo, para el despliegue final se requiere una
 única recomendación accionable. Se implementó una estrategia de escalarización
 \textit{a priori}, donde el usuario define sus preferencias antes de la
 optimización mediante coeficientes de peso $\lambda$:
@@ -232,132 +220,127 @@ optimización mediante coeficientes de peso $\lambda$:
 Donde $\tilde{J}$ indica que las funciones han sido normalizadas para evitar
 que magnitudes numéricas grandes dominen sobre las pequeñas.
 
-Perfiles de Usuario:
+Perfiles de usuario:
 \begin{itemize}
-    \item Perfil "Gran Fondo": $\lambda_1=0.6, \lambda_2=0.3, \lambda_3=0.1$ (Prioridad
-          Confort).
-    \item Perfil "Contrarreloj": $\lambda_1=0.2, \lambda_2=0.3, \lambda_3=0.5$ (Prioridad
-          Aero).
+    \item Perfil Gran fondo: $\lambda_1=0.6, \lambda_2=0.3, \lambda_3=0.1$.
+    \item Perfil Contrarreloj: $\lambda_1=0.2, \lambda_2=0.3, \lambda_3=0.5$.
 \end{itemize}
 
-\section{Reporte de Recomendaciones: Interfaz de Comunicación y Cierre del Ciclo}
+\section{Reporte de recomendaciones: interfaz de comunicación y cierre del ciclo}
 
-La sección final del diseño del sistema, el "Reporte", no es un mero accesorio
+La sección final del diseño del sistema, el reporte, no es un mero accesorio
 administrativo, sino un componente crítico de la ingeniería del sistema. En la
-teoría de control, esta etapa corresponde al Actuador.
+teoría de control, esta etapa corresponde al \textit{actuador}.
 
-Dado que el sistema no es mecatrónico (no ajusta la bicicleta automáticamente
-con motores), el "actuador" es el ser humano. El reporte debe cerrar la
+Dado que el sistema no es mecatrónico, el actuador es el ser humano. El reporte debe cerrar la
 \textit{brecha semántica} entre los resultados numéricos del optimizador y las
 acciones físicas requeridas en el mundo real. Si el reporte es confuso, el
 usuario ejecutará mal los cambios, introduciendo error en el sistema. Por
-tanto, el diseño de esta sección se basa en principios de Interacción
-Humano-Computadora (HCI) y carga cognitiva.
+tanto, el diseño de esta sección se basa en principios de interacción
+humano-computadora y carga cognitiva.
 
-\subsection{Transformación de Datos a Conocimiento (Data-to-Wisdom)}
+\subsection{Transformación de datos a conocimiento}
 
-Siguiendo la jerarquía DIKW (Data, Information, Knowledge, Wisdom), el sistema
+Siguiendo la jerarquía DIKW, el sistema
 procesa la salida cruda del algoritmo genético para generar directrices
 operativas.
 
 \begin{itemize}
-    \item Datos (Salida del AG): Vector óptimo $\mathbf{x}^* = [745.2, 55.1, 620.0, 390.5]$.
-    \item Información (Cálculo Diferencial): Se compara el óptimo con la medida actual $\mathbf{x}_{\text{actual}}$ extraída de la visión por computador calibrada.
+    \item Datos: vector óptimo $\mathbf{x}^* = [745.2, 55.1, 620.0, 390.5]$.
+    \item Información: se compara el óptimo con la medida actual $\mathbf{x}_{\text{actual}}$ extraída de la visión por computador calibrada.
           \[ \Delta \mathbf{x} = \mathbf{x}^* - \mathbf{x}_{\text{actual}} \quad \text{Ejemplo: } \Delta h_{\text{sillin}} = +5.2 \text{ mm}. \]
-    \item Conocimiento (Filtrado Semántico y Cuantización): Reportar "+5.2 mm" es un error de diseño por falsa precisión. Las herramientas manuales y el error de paralaje humano impiden ajustes con tal precisión. Además, existen zonas de insensibilidad fisiológica. Se implementa un \textit{filtro de banda muerta (Deadband Filter)}:
+    \item Conocimiento: reportar "+5.2 mm" es un error de diseño por falsa precisión. Las herramientas manuales y el error de paralaje humano impiden ajustes con tal precisión. Además, existen zonas de insensibilidad fisiológica. Se implementa un \textit{filtro de banda muerta}:
           \begin{equation}
               \text{Acción}_i = \begin{cases}
-                  \text{"MANTENER"} & \text{si } |\Delta x_i| < \epsilon_{\text{tolerancia}}    \\
-                  \text{"AJUSTAR"}  & \text{si } |\Delta x_i| \geq \epsilon_{\text{tolerancia}}
+                  \text{MANTENER} & \text{si } |\Delta x_i| < \epsilon_{\text{tolerancia}}    \\
+                  \text{AJUSTAR}  & \text{si } |\Delta x_i| \geq \epsilon_{\text{tolerancia}}
               \end{cases}
           \end{equation}
-          Se estableció $\epsilon = 3$ mm como el umbral de percepción biomecánica mínima significativa. Esto reduce la "ansiedad de ajuste" del usuario.
+          Se estableció $\epsilon = 3$ mm como el umbral de percepción biomecánica mínima significativa. Esto reduce la ansiedad de ajuste del usuario.
 \end{itemize}
 
-\subsection{Arquitectura Visual del Reporte}
+\subsection{Arquitectura visual del reporte}
 
 El reporte se genera automáticamente en formato PDF, diseñado para ser
 consumido en dispositivos móviles. La estructura visual se divide en tres
 niveles de profundidad:
 
-\subsubsection{Nivel 1: Diagnóstico Visual Aumentado (Realidad Aumentada Estática)}
+\subsubsection{Nivel 1: diagnóstico visual aumentado}
 En lugar de gráficos abstractos, el sistema utiliza la imagen original del
 usuario como lienzo. Sobre el fotograma clave, se superpone el esqueleto
-cinemático detectado con una Codificación Cromática de Semáforo:
+cinemático detectado con una codificación cromática de semáforo:
 \begin{itemize}
-    \item Rojo ($J_{\text{local}} > \text{Umbral crítico}$): Indica riesgo de lesión inminente.
-    \item Amarillo ($J_{\text{local}} \approx \text{Límite}$): Zona de precaución.
-    \item Verde ($J_{\text{local}} \approx 0$): Rango óptimo.
+    \item Rojo: indica riesgo de lesión inminente.
+    \item Amarillo: zona de precaución.
+    \item Verde: rango óptimo.
 \end{itemize}
-Esto aprovecha el procesamiento pre-atentivo del cerebro humano; el usuario "ve" directamente el riesgo sobre su propia imagen.
+Esto aprovecha el procesamiento preatentivo del cerebro humano; el usuario ve directamente el riesgo sobre su propia imagen.
 
-\subsubsection{Nivel 2: Plan de Ejecución Mecánica}
+\subsubsection{Nivel 2: plan de ejecución mecánica}
 Esta sección traduce el vector $\Delta \mathbf{x}$ en instrucciones
-lingüísticas (verbos imperativos direccionales).
+lingüísticas.
 
 \begin{table}[h]
     \centering
-    \caption{Tabla de Acciones}
+    \caption{Tabla de acciones}
     \label{tab:acciones}
     \begin{tabular}{l c c c r}
         \toprule
-        Componente & Ajuste Actual & Ajuste Objetivo & Acción Requerida & Magnitud \\
+        Componente & Ajuste actual & Ajuste objetivo & Acción requerida & Magnitud \\
         \midrule
-        Sillín (Altura)     & 740 mm                 & 752 mm                   & SUBIR $\uparrow$          & 12 mm             \\
-        Sillín (Retroceso)  & 60 mm                  & 58 mm                    & ADELANTAR $\leftarrow$    & 2 mm              \\
-        Manillar (Stack)    & 630 mm                 & 630 mm                   & CORRECTO -                & 0 mm              \\
+        Sillín     & 740 mm                 & 752 mm                   & SUBIR $\uparrow$          & 12 mm             \\
+        Sillín     & 60 mm                  & 58 mm                    & ADELANTAR $\leftarrow$    & 2 mm              \\
+        Manillar     & 630 mm                 & 630 mm                   & CORRECTO -                & 0 mm              \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-Esta tabla actúa como una lista de verificación (\textit{checklist}) para
+Esta tabla actúa como una lista de verificación para
 reducir el error de ejecución.
 
-\subsubsection{Nivel 3: Predicción de Resultados (Feedforward)}
+\subsubsection{Nivel 3: predicción de resultados}
 El sistema proyecta qué sucederá \textit{después} de realizar los cambios.
-Muestra los "Ángulos Esperados" post-ajuste, proporcionando refuerzo positivo
-(e.g., "Al subir el sillín 12mm, tu ángulo de rodilla pasará de 125$^\circ$ a
-140$^\circ$, reduciendo la presión patelar").
+Muestra los ángulos esperados postajuste, proporcionando refuerzo positivo.
 
-\subsection{Implementación de Software y Modularidad}
+\subsection{Implementación de software y modularidad}
 
 La generación del reporte se implementó siguiendo el patrón de diseño
-Model-View-Controller (MVC), desacoplando la lógica de datos de la
+Model-View-Controller, desacoplando la lógica de datos de la
 presentación visual.
 \begin{itemize}
-    \item Motor de Renderizado: Biblioteca ReportLab en Python para PDFs vectoriales.
-    \item Plantillas Dinámicas: El diseño se adapta al contenido; si no hay problemas en el manillar, esa sección se minimiza.
-    \item Interoperabilidad: Incluye metadatos exportables (JSON/XML) para futura integración con "bicicletas inteligentes".
+    \item Motor de renderizado: biblioteca ReportLab en Python para PDFs vectoriales.
+    \item Plantillas dinámicas: el diseño se adapta al contenido; si no hay problemas en el manillar, esa sección se minimiza.
+    \item Interoperabilidad: incluye metadatos exportables para futura integración con bicicletas inteligentes.
 \end{itemize}
 
-\subsection{Cierre del Lazo de Control (Human-in-the-Loop)}
+\subsection{Cierre del lazo de control}
 
 El sistema está diseñado para ser iterativo. El reporte finaliza con una
-instrucción explícita de Re-validación. Debido a errores en la
+instrucción explícita de revalidación. Debido a errores en la
 medición manual o en la ejecución del ajuste, la primera iteración rara vez es
 perfecta. El flujo de trabajo propuesto es circular:
 \begin{enumerate}
-    \item Captura y Análisis.
-    \item Optimización y Reporte.
-    \item Ejecución Física (Humano).
-    \item Nueva Captura y Verificación.
+    \item Captura y análisis.
+    \item Optimización y reporte.
+    \item Ejecución física.
+    \item Nueva captura y verificación.
 \end{enumerate}
 Este ciclo convierte el proceso en un sistema de control realimentado que converge asintóticamente hacia la configuración óptima.
 
-\section{Conclusiones del Capítulo e Integración del Sistema}
+\section{Conclusiones del capítulo e integración del sistema}
 
 El diseño presentado en este capítulo consolida una solución tecnológica
 integral para el problema de la optimización biomecánica. La coherencia del
 sistema se manifiesta en la interdependencia estricta de sus módulos:
 
 \begin{itemize}
-    \item La precisión de la adquisición (Sección 3.3) garantiza datos
+    \item La precisión de la adquisición garantiza datos
           fidedignos.
-    \item El modelado físico riguroso (Sección 3.4) proporciona métricas de alto
+    \item El modelado físico riguroso proporciona métricas de alto
           nivel mediante dinámica inversa.
-    \item El motor de decisión (Algoritmos Genéticos) (Sección 3.5) explota
+    \item El motor de decisión explota
           estas métricas para resolver conflictos matemáticos complejos.
-    \item El módulo de reporte (Sección 3.6) traduce esta inteligencia
+    \item El módulo de reporte traduce esta inteligencia
           artificial en acción humana efectiva.
 \end{itemize}
 
