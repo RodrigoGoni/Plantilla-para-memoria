@@ -20,10 +20,13 @@
 
 \usepackage[utf8]{inputenc} % Codificación de entrada UTF-8
 \usepackage[T1]{fontenc}    % Codificación de salida para caracteres especiales
+\usepackage{amsmath}        % Paquete matemático avanzado (matrices, ecuaciones)
+\usepackage{amssymb}        % Símbolos matemáticos adicionales (como \mathbb)
 \usepackage{graphicx}       % Manejo de gráficos
 \usepackage{float}          % Para posicionamiento exacto de figuras con [H]
 \usepackage{eso-pic}        % Permite agregar fondos
 \usepackage{hyperref}       % Manejo de hipervínculos y marcadores
+\usepackage{caption}        % Permite footnotes en captions de figuras
 
 % Redefinición de caracteres problemáticos en marcadores
 \hypersetup{
@@ -133,7 +136,7 @@ Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONA
 \renewcommand{\bibname}{Bibliografía} % Para asegurarte de que el título sea correcto
 \phantomsection % Necesario para que el enlace del marcador sea correcto
 
-\printbibliography[heading=bibintoc]
+\printbibliography
 
 \end{document}
 

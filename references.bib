@@ -1,5 +1,5 @@
 @ARTICLE{pubmed:staticvsdynamic,
-    AUTHOR="Holliday W, Fisher J, Theo R, Swart J.",
+    AUTHOR="Holliday, W. and Fisher, J. and Theo, R. and Swart, J.",
     TITLE="Static versus dynamic kinematics in cyclists: A comparison of goniometer, inclinometer and 3D motion capture",
     url = { https://pubmed.ncbi.nlm.nih.gov/28749730/},
     JOURNAL="PubMed",
@@ -26,7 +26,7 @@
 }
 
 @ARTICLE{fonda2013validity,
-    AUTHOR="Fonda B, Sarabon N, Li FX.",
+    AUTHOR="Fonda, B. and Sarabon, N. and Li, F.X.",
     TITLE="Validity and reliability of different kinematics methods used for bike fitting",
     JOURNAL="Journal of Sports Sciences",
     YEAR="2014",
@@ -46,8 +46,16 @@
     URLDATE = {2025-11-06}
 }
 
+@MISC{ucm:kalman,
+  author = {Universidad Complutense de Madrid},
+  title = {Filtro de Kalman},
+  year = "2025",
+  url = {https://www.ucm.es/data/cont/media/www/pag-41459/Filtro%20de%20Kalman.pdf},
+  note = {Accedido el 26 de noviembre de 2025}
+}
+
 @ARTICLE{review2019cycling,
-    AUTHOR="Swart J, Holliday W. Cycling",
+    AUTHOR="Swart, J. and Holliday, W.",
     TITLE="Cycling Biomechanics Optimization-the (R) Evolution of Bicycle Fitting",
     JOURNAL="PubMed (Am J Sports Med)",
     YEAR="2019",
@@ -423,8 +431,6 @@
   pages = {543--548},
   year = {2002},
   publisher = {Elsevier},
-  doi = {10.1016/S0021-9290(01)00222-6},
-  [cite_start]note = {[cite: 13, 208]}
 }
 
 @article{Wu2005_ISB_Part2,
@@ -436,8 +442,6 @@
   pages = {981--992},
   year = {2005},
   publisher = {Elsevier},
-  doi = {10.1016/j.jbiomech.2004.05.042},
-  [cite_start]note = {[cite: 14, 210]}
 }
 
 @article{GroodSuntay1983,
@@ -449,9 +453,8 @@
   pages = {136--144},
   year = {1983},
   publisher = {ASME},
-  doi = {10.1115/1.3138397},
-  [cite_start]note = {Referencia estándar para la secuencia de rotación de rodilla mencionada en el texto [cite: 54]}
-}
+  doi = {10.1115/1.3138397}
+  }
 
 %----------------------------------------------------------------------------------------
 %	OPTIMIZACIÓN Y VISIÓN POR COMPUTADORA
@@ -465,7 +468,6 @@
   year = {2022},
   publisher = {Springer},
   url = {https://www.ecva.net/papers/eccv_2022/papers_ECCV/papers/136650685.pdf},
-  [cite_start]note = {Base para la optimización de longitud ósea [cite: 120, 224]}
 }
 
 @article{Rangel2023_DigitalTwin,
@@ -474,7 +476,6 @@
   journal = {Research@Tec},
   year = {2023},
   url = {https://research.tec.mx/vivo-tec/display/AcademicArticleSCO_85158877183},
-  [cite_start]note = {Fuente primaria del Gemelo Digital [cite: 200]}
 }
 
 %----------------------------------------------------------------------------------------
@@ -489,8 +490,6 @@
   pages = {245--251},
   year = {2001},
   publisher = {Springer},
-  doi = {10.1007/s004210100436},
-  [cite_start]note = {Fuente de la ecuación de regresión de área frontal [cite: 179, 230]}
 }
 
 @article{Underwood2020_Aero,
@@ -502,8 +501,7 @@
   pages = {8635},
   year = {2020},
   publisher = {MDPI},
-  doi = {10.3390/app10238635},
-  [cite_start]note = {Modelo multivariable para CdA [cite: 188, 231]}
+  note = {Modelo multivariable para CdA }
 }
 
 %----------------------------------------------------------------------------------------
@@ -517,5 +515,53 @@
   edition = {4th},
   publisher = {John Wiley \& Sons},
   address = {Hoboken, NJ},
-  [cite_start]note = {Texto canónico para el filtrado Butterworth y Dinámica Inversa 2D [cite: 69]}
+  note = {Texto canónico para el filtrado Butterworth y Dinámica Inversa 2D }
+}
+
+%----------------------------------------------------------------------------------------
+%	AERODINÁMICA - ESTUDIOS DE BASSETT Y HEIL
+%----------------------------------------------------------------------------------------
+
+@article{Bassett1999_HourRecord,
+  title = {Comparing cycling world hour records, 1967-1996: modeling with empirical data},
+  author = {Bassett, D. R. and Kyle, C. R. and Passfield, L. and Broker, J. P. and Burke, E. R.},
+  journal = {Journal of Applied Physiology},
+  volume = {87},
+  number = {5},
+  pages = {1662--1671},
+  year = {1999},
+  note = {Estudio clave sobre la modelización de potencia y resistencia aerodinámica en el récord de la hora.}
+}
+
+@article{Heil2001_BodyMassScaling,
+  title = {Body mass scaling of projected frontal area in competitive cyclists},
+  author = {Heil, Daniel P.},
+  journal = {European Journal of Applied Physiology},
+  volume = {85},
+  number = {3-4},
+  pages = {358--366},
+  year = {2001},
+  note = {Referencia correcta para la ecuación de área frontal escalada por masa (m^0.425).}
+}
+
+@misc{sdycontrol2023newton,
+  author = {SD\&Christian},
+  title = {Newton vs Euler-Lagrange},
+  howpublished = {\url{https://medium.com/@sdycontrol/newton-euler-vs-euler-lagrange-bcf4a33e0f73}},
+  year = {2023},
+  month = {jun},
+  day = {8},
+  note = {Fecha de acceso: 26 de noviembre de 2025}
+}
+
+@article{Henneman1965,
+  author    = {Henneman, Elwood and Somjen, George and Carpenter, David O.},
+  title     = {Functional significance of cell size in spinal motoneurons},
+  journal   = {Journal of Neurophysiology},
+  volume    = {28},
+  number    = {3},
+  pages     = {560--580},
+  year      = {1965},
+  publisher = {American Physiological Society},
+  doi       = {10.1152/jn.1965.28.3.560}
 }
