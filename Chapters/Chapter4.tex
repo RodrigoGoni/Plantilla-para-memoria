@@ -7,9 +7,14 @@ En este capítulo se describen los ensayos realizados y los resultados
 obtenidos durante el desarrollo del sistema. En la
 sección~\ref{sec:adquisicion} se detalla el proceso de adquisición de datos,
 tanto de video como del rodillo inteligente, y el protocolo de prueba
-diseñado. En la sección~\ref{sec:analisis} se presenta el análisis de los
-datos recolectados, las decisiones metodológicas derivadas y las métricas de
-calidad obtenidas.
+diseñado. En la sección~\ref{sec:analisis} se presenta el análisis exploratorio
+de los datos recolectados y las decisiones metodológicas derivadas. En la
+sección~\ref{sec:pipeline} se describe la arquitectura del \textit{pipeline}
+de procesamiento y optimización. En la sección~\ref{sec:pasos_previos} se
+detallan los pasos de preparación previos a la ejecución del \textit{pipeline}.
+Finalmente, en la sección~\ref{sec:etapas_pipeline} se describen las etapas
+que lo componen, desde la sincronización de fuentes de datos hasta la
+optimización NSGA-II.
 
 % =============================================================================
 \section{Adquisición de datos}
@@ -38,18 +43,19 @@ Se evaluaron distintas configuraciones de la cámara, como la exposición
 manual y el enfoque fijo, sin obtener mejoras significativas en la nitidez de
 las imágenes. Se concluyó que la cámara no era capaz de registrar imágenes
 nítidas bajo las condiciones de iluminación y movimiento presentes durante el
-pedaleo. En la figura~\ref{fig:calidad_imagen} se muestra un ejemplo
-representativo de los fotogramas obtenidos con esta cámara, junto con la
-distribución del nivel de \textit{blur} medido.
+pedaleo. En la figura~\ref{fig:calidad_imagen} se muestra un fotograma
+representativo obtenido con esta cámara, donde se aprecia el \textit{blur}
+en la rodilla del ciclista, junto con los valores de telemetría y los
+indicadores de \textit{blur} y ruido calculados para ese fotograma.
 
-% --- Figura: distribución de blur – LifeCam HD-3000 ---
+% --- Figura: fotograma con blur – LifeCam HD-3000 ---
 \begin{figure}[H]
       \centering
       \includegraphics[width=0.80\textwidth]{./Figures/f_m_calidad.png}
-      \caption{Distribución del nivel de \textit{motion blur} en las imágenes
-            capturadas con la cámara Microsoft LifeCam HD-3000. El alto nivel de
-            borrosidad dificultó la detección de \textit{keypoints} en las
-            extremidades inferiores del ciclista.}
+      \caption{Fotograma capturado con la cámara Microsoft LifeCam HD-3000
+            donde se aprecia el \textit{motion blur} en la rodilla del
+            ciclista. Se muestran además los datos de telemetría y los
+            valores de \textit{blur} y ruido calculados para ese fotograma.}
       \label{fig:calidad_imagen}
 \end{figure}
 % -------------------------------------------------------
@@ -191,7 +197,7 @@ los \textit{timestamps} codificados en los nombres de archivo. En la
 tabla~\ref{tab:frecuencia_captura} se resumen las estadísticas obtenidas.
 
 % --- Tabla: frecuencia de captura ---
-\begin{table}[htbp]
+\begin{table}[H]
       \caption{Estadísticas de la frecuencia de captura de imágenes durante la
             sesión.}
       \label{tab:frecuencia_captura}
@@ -232,7 +238,7 @@ resumen estadístico de la sesión y las métricas de sincronización obtenidas,
 respectivamente.
 
 % --- Tabla: resumen de sesión ---
-\begin{table}[htbp]
+\begin{table}[H]
       \caption{Resumen estadístico de las métricas de rendimiento registradas
             durante la sesión.}
       \label{tab:resumen_sesion}
@@ -254,7 +260,7 @@ respectivamente.
 % --------------------------------
 
 % --- Tabla: error de sincronización ---
-\begin{table}[htbp]
+\begin{table}[H]
       \caption{Error de sincronización temporal entre la captura de imágenes y
             los datos del rodillo inteligente.}
       \label{tab:sincronizacion}
@@ -288,8 +294,7 @@ Se diseñó un \textit{pipeline} de procesamiento que integra las dos fuentes de
 datos adquiridas —video del ciclista y telemetría del rodillo inteligente— y
 las transforma progresivamente hasta obtener los parámetros biomecánicos
 optimizados. Las etapas que lo componen son: pasos previos de calibración y
-selección de inicio, extracción de \textit{keypoints} mediante MediaPipe
-BlazePose, filtrado cinemático con el filtro de Kalman, interpolación de la
+selección de inicio, extracción de \textit{keypoints} mediante \texttt{MediaPipe BlazePose}, filtrado cinemático con el filtro de Kalman, interpolación de la
 telemetría a 30~FPS, construcción del modelo biomecánico digital y optimización
 multiobjetivo con el algoritmo genético. En la
 figura~\ref{fig:pipeline} se presenta un diagrama con la arquitectura completa
@@ -371,3 +376,646 @@ vertical indica el punto de inicio seleccionado.
       \label{fig:seleccion_inicio}
 \end{figure}
 % ------------------------------------
+
+Los parámetros empleados en el filtro de selección de inicio se resumen en
+la tabla~\ref{tab:params_inicio}.
+
+% --- Tabla: parámetros del filtro de inicio ---
+\begin{table}[H]
+      \caption{Parámetros del filtro de selección de inicio de pedaleo.}
+      \label{tab:params_inicio}
+      \centering
+      \small
+      \begin{tabular}{p{0.22\linewidth}p{0.46\linewidth}p{0.20\linewidth}}
+            \toprule
+            \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
+            \texttt{min\_power}       & Potencia mínima de activación          & 80~W   \\
+            \texttt{min\_cadence}     & Cadencia mínima de activación          & 60~RPM \\
+            \texttt{min\_consecutive} & Muestras consecutivas de confirmación  & 3      \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+% -----------------------------------------------
+
+% =============================================================================
+\section{Etapas del \textit{pipeline}}
+\label{sec:etapas_pipeline}
+% =============================================================================
+
+A continuación se describen las etapas que componen el \textit{pipeline} de
+procesamiento, en el orden en que se ejecutan sobre los datos de la sesión.
+
+% -----------------------------------------------------------------------------
+\subsection{Sincronización de fuentes de datos}
+\label{ssec:sync}
+% -----------------------------------------------------------------------------
+
+La sincronización temporal entre los fotogramas de video y la telemetría del
+rodillo se realizó mediante el módulo \texttt{sync.py}. El algoritmo opera
+por búsqueda del vecino más cercano en el eje temporal (\textit{nearest-neighbor matching}): a cada fotograma se le asigna la muestra
+de telemetría cuyo \textit{timestamp} Unix presenta la menor diferencia
+absoluta con el \textit{timestamp} del fotograma, con una tolerancia máxima
+de 500~ms. Las muestras de telemetría sin fotograma asociado se descartan;
+los fotogramas sin muestra de telemetría dentro de la tolerancia se marcan
+como no sincronizados y se excluyen del análisis posterior.
+
+El error de sincronización resultante se cuantificó sobre la totalidad de la
+sesión. Los resultados, ya presentados en la
+tabla~\ref{tab:sincronizacion}, indican un error medio de 250{,}35~ms y un
+error máximo de 984{,}43~ms, valores aceptables dado que la cadencia de
+potencia del rodillo (1~Hz) impone una resolución nativa de 500~ms.
+En la figura~\ref{fig:hist_sync} se muestra la distribución del error de
+sincronización por fotograma.
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.80\textwidth]{./Figures/h_error_sinc.png}
+      \caption{Distribución del error de sincronización temporal entre
+            fotogramas y muestras de telemetría.}
+      \label{fig:hist_sync}
+\end{figure}
+% ---------------------------------------------------------------
+
+Los parámetros configurados en el módulo \texttt{sync.py} para la sesión se
+resumen en la tabla~\ref{tab:params_sync}.
+
+% --- Tabla: parámetros de sincronización ---
+\begin{table}[H]
+      \caption{Parámetros del algoritmo de sincronización
+            \textit{nearest-neighbor} implementado en \texttt{sync.py}.}
+      \label{tab:params_sync}
+      \centering
+      \small
+      \begin{tabular}{p{0.22\linewidth}p{0.46\linewidth}p{0.20\linewidth}}
+            \toprule
+            \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
+            Método                   & Estrategia de emparejamiento temporal          & Vecino más cercano \\
+            Tolerancia máxima        & Diferencia admisible entre \textit{timestamps} & 1{,}000~ms         \\
+            Frecuencia de telemetría & Resolución nativa de la señal del rodillo      & 1~Hz               \\
+            Frecuencia de video      & Tasa de captura de fotogramas                  & 30~FPS             \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+% -------------------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Inferencia de pose}
+\label{ssec:inferencia_pose}
+% -----------------------------------------------------------------------------
+
+La extracción de \textit{keypoints} corporales se llevó a cabo mediante el
+módulo \texttt{pose\_in\-ference.py}, que implementa el modelo \texttt{MediaPipe BlazePose} en su variante \textit{heavy}. El modelo recibe cada fotograma en
+espacio de color RGB y produce un conjunto de 33 \textit{landmarks}
+corporales con coordenadas normalizadas $(x, y) \in [0,1]$, profundidad
+relativa~$z$ y un \textit{score} de visibilidad por \textit{landmark}.
+
+Se configuró un umbral mínimo de confianza de 0{,}5 tanto para la detección
+inicialización como para el seguimiento entre fotogramas. Los
+\textit{frames} en los que no se detectó ninguna pose, o en los que la
+visibilidad de los \textit{keypoints} clave (rodilla, cadera y tobillo) fue
+inferior al umbral, se excluyeron del análisis cinemático. En la
+figura~\ref{fig:pose_inferencia} se muestran dos fotogramas representativos
+con el esqueleto de 33 \textit{landmarks} superpuesto: el primero corresponde
+al inicio de la sesión y el segundo a un fotograma próximo al cierre.
+
+% --- Figura: inferencia de pose ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/pose_inferencia.png}
+      \caption{Resultado de la inferencia de pose con \texttt{MediaPipe BlazePose}.
+            El esqueleto de 33 \textit{landmarks} se superpone al fotograma
+            del ciclista en el rodillo inteligente.}
+      \label{fig:pose_inferencia}
+\end{figure}
+% -----------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Interpolación de telemetría}
+\label{ssec:interpolacion}
+% -----------------------------------------------------------------------------
+
+Con el objeto de asociar un valor continuo de potencia, cadencia y frecuencia
+cardíaca a cada fotograma, se interpolaron las señales de telemetría de 1~Hz
+hasta la frecuencia de captura del video (30~FPS) mediante el módulo
+\texttt{interpolation.py}. El método de interpolación empleado fue el
+\textit{spline} cúbico, que garantiza continuidad en derivadas de primer y
+segundo orden, evitando discontinuidades en la señal interpolada. Los
+\textit{timestamps} de los fotogramas se utilizaron como soporte de la
+interpolación, de modo que cada fotograma recibió exactamente un valor
+interpolado de cada variable.
+
+En la figura~\ref{fig:interpolacion} se aprecia la interfaz de verificación
+posterior a la interpolación, donde se superponen la señal original (1~Hz)
+y la señal interpolada (30~FPS) para los primeros segundos de la sesión.
+
+% --- Figura: interpolación de telemetría ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/interpolacion_telemetria.png}
+      \caption{Comparación entre la señal de telemetría original a 1~Hz y la
+            señal interpolada a 30~FPS mediante \textit{spline} cúbico.
+            Se muestra un segmento representativo de la variable de potencia.}
+      \label{fig:interpolacion}
+\end{figure}
+% -------------------------------------------
+
+Los parámetros del módulo \texttt{interpolation.py} empleados en la sesión se
+presentan en la tabla~\ref{tab:params_interp}.
+
+% --- Tabla: parámetros de interpolación ---
+\begin{table}[H]
+      \caption{Parámetros del módulo de interpolación de telemetría
+            implementado en \texttt{interpolation.py}.}
+      \label{tab:params_interp}
+      \centering
+      \small
+      \begin{tabular}{p{0.22\linewidth}p{0.46\linewidth}p{0.20\linewidth}}
+            \toprule
+            \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
+            Método                & Tipo de interpolación               & Lineal               \\
+            Frecuencia de origen  & Resolución temporal de la telemetría               & 1~Hz                 \\
+            Frecuencia objetivo   & Tasa de captura del video                          & 30~FPS               \\
+            Extrapolación lateral & Relleno fuera del soporte   & Valor extremo válido \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+% -------------------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Procesamiento de \textit{keypoints}}
+\label{ssec:proc_kp}
+% -----------------------------------------------------------------------------
+
+Previo al cálculo biomecánico, las trayectorias de los \textit{keypoints}
+fueron refinadas mediante el módulo \texttt{keypoint\_processor.py}. El
+procesamiento comprendió tres pasos secuenciales.
+
+En primer lugar, se eliminaron los \textit{outliers} espaciales: los
+\textit{keypoints} con \textit{score} de visibilidad inferior a 0{,}3 se marcaron
+como inválidos y sus coordenadas se reemplazaron por interpolación lineal
+entre el fotograma válido anterior y el posterior. En segundo lugar, los
+fotogramas en los que alguno de los seis \textit{keypoints} estructurales
+(cadera, rodilla, tobillo, hombro, codo, muñeca del lado visible) resultó
+inválido se interpolaron de forma completa.
+
+En tercer lugar, se aplicó un filtro de Kalman univariado de forma
+independiente a cada coordenada de cada \textit{keypoint}, con el fin de
+suavizar el ruido de detección y eliminar los saltos discretos entre
+fotogramas consecutivos. La trayectoria de la rodilla antes del filtrado,
+ilustrada en la figura~\ref{fig:trayectoria_rodilla}, presenta una
+dispersión apreciable. En las figuras~\ref{fig:kalman_x} y~\ref{fig:kalman_tray} se muestran,
+respectivamente, la serie temporal de la coordenada~$x$ y la trayectoria
+espacial $(x,y)$ de la rodilla antes y después de aplicar el filtro de
+Kalman.
+
+% --- Figura: serie temporal coordenada x de la rodilla ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.95\textwidth]{./Figures/kalman_knee_x.png}
+      \caption{Serie temporal de la coordenada~$x$ del \textit{keypoint} de
+            la rodilla. El panel izquierdo corresponde a la señal sin filtrar
+            y el derecho a la señal tras aplicar el filtro de Kalman; el
+            suavizado elimina el ruido de alta frecuencia sin alterar la
+            tendencia temporal.}
+      \label{fig:kalman_x}
+\end{figure}
+% ----------------------------------------------------------
+
+% --- Figura: dispersión x-y de la rodilla ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.95\textwidth]{./Figures/kalman_knee_trajectory.png}
+      \caption{Diagrama de dispersión de las posiciones $(x,y)$ del
+            \textit{keypoint} de la rodilla. El panel izquierdo muestra la
+            nube de puntos sin filtrar; el derecho, la trayectoria suavizada
+            con el filtro de Kalman. La reducción de la dispersión confirma
+            la eficacia del filtrado en el dominio espacial.}
+      \label{fig:kalman_tray}
+\end{figure}
+% --------------------------------------------
+
+Los parámetros del filtro de Kalman univariado se presentan en la
+tabla~\ref{tab:params_kalman}.
+
+% --- Tabla: parámetros del filtro de Kalman ---
+\begin{table}[H]
+      \caption{Parámetros del filtro de Kalman univariado aplicado al suavizado
+            de las trayectorias de \textit{keypoints}, implementado en
+            \texttt{keypoint\_processor.py}.}
+      \label{tab:params_kalman}
+      \centering
+      \small
+      \begin{tabular}{p{0.22\linewidth}p{0.46\linewidth}p{0.20\linewidth}}
+            \toprule
+            \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
+            $Q$ (     & Varianza del ruido de proceso           & $0{,}01$         \\
+            $R$  & Varianza del ruido de medición          & $0{,}10$         \\
+            $P_0$                               & Covarianza inicial del estado           & $1000\cdot I$    \\
+            Vector de estado                    & Variables estimadas $(x,\,\dot{x})$    & pos.~y velocidad \\
+            $dt$                                & Paso de tiempo (inferido de la captura) & $1/30$~s         \\
+            Detección de \textit{outliers}      & Método de rechazo previo al filtrado    & \textit{Z-score} \\
+            Umbral \textit{Z-score}              & Umbral de rechazo de \textit{outliers}  & 3{,}0            \\
+            Visibilidad mínima aceptable        & \textit{Score} \texttt{MediaPipe} de visibilidad & 0{,}50  \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+% -----------------------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Ángulos articulares}
+\label{ssec:angulos}
+% -----------------------------------------------------------------------------
+
+Los ángulos articulares del ciclista se calcularon a partir de las
+trayectorias de \textit{keypoints} filtradas, mediante el módulo
+\texttt{angles.py}. El ángulo en cada articulación se obtuvo con la función
+\texttt{arctan2} aplicada sobre los vectores formados desde el vértice hacia
+cada extremo del segmento:
+
+\begin{equation}
+      \theta = \arctan2\bigl(\vec{ba}\times\vec{bc},\;\vec{ba}\cdot\vec{bc}\bigr)
+      \label{eq:angulo}
+\end{equation}
+
+Las articulaciones calculadas fueron: rodilla (cadera--rodilla--tobillo),
+cadera (hombro--cadera--rodilla), hombro (codo--hombro--cadera) y torso
+(cadera--hombro vertical). El lado analizado (izquierdo o derecho) se
+determinó automáticamente por visibilidad promedio de los \textit{keypoints}
+correspondientes.
+
+En la figura~\ref{fig:angulos_tiempo} se presenta la serie temporal de los
+ángulos articulares de rodilla, cadera, hombro y torso a lo largo de la
+sesión. Esta representación permite observar la periodicidad del ciclo de
+pedaleo, identificar zonas de inestabilidad cinemática y evaluar la variación
+de los ángulos en función del nivel de potencia sostenido.
+
+% --- Figura: serie temporal ángulos articulares ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/angulos_t.png}
+      \caption{Serie temporal de los ángulos articulares calculados durante la
+            sesión. Cada curva corresponde a una articulación; la periodicidad
+            refleja el ciclo de pedaleo a 90~RPM.}
+      \label{fig:angulos_tiempo}
+\end{figure}
+% -------------------------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Fuerzas de pedaleo}
+\label{ssec:fuerzas}
+% -----------------------------------------------------------------------------
+
+Las fuerzas de reacción en los pedales se estimaron mediante el módulo
+\texttt{forces.py}, que combina la cinemática obtenida del video con los
+datos de potencia y cadencia del rodillo inteligente. Se calcularon las
+componentes tangencial~$F_t$ y radial~$F_r$ de la fuerza sobre el pedal en
+cada fotograma a partir de la expresión:
+
+\begin{equation}
+      F_t = \frac{P}{\omega\, r}
+      \label{eq:fuerza_tangencial}
+\end{equation}
+
+donde $P$ es la potencia medida en~W, $\omega$ es la velocidad angular de
+la manivela en~rad/s derivada de la cadencia, y $r$ es la longitud de la
+manivela obtenida del perfil biomecánico del ciclista. La componente radial
+se estimó a partir de los ángulos articulares de la rodilla y la cadera.
+
+En la figura~\ref{fig:fuerzas_frame} se muestra un fotograma representativo
+con los vectores de fuerza superpuestos sobre la imagen del ciclista. La
+dirección y la magnitud del vector reflejan la fuerza estimada en el pedal
+para el instante correspondiente.
+
+% --- Figura: vectores de fuerza en fotograma ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.80\textwidth]{./Figures/fuerzas_frame.png}
+      \caption{Fotograma representativo con los vectores de fuerza de pedaleo
+            superpuestos. La flecha celeste corresponde a la fuerza tangencial
+            izquierda~$F_{t,\text{izq}}$. La longitud del vector es proporcional
+            a la magnitud de la fuerza estimada; la dirección indica la componente
+            tangencial sobre el pedal.}
+      \label{fig:fuerzas_frame}
+\end{figure}
+% -----------------------------------------------
+
+En la figura~\ref{fig:fuerza_t} se presenta la evolución temporal de la
+fuerza tangencial estimada a lo largo de la sesión. La señal exhibe un
+patrón periódico consistente con el ciclo de pedaleo a 90~RPM; los
+incrementos escalonados en la magnitud media reflejan los aumentos de
+potencia establecidos en el protocolo de rampa, lo que confirma la
+coherencia entre las estimaciones cinemáticas y la telemetría del rodillo.
+
+% --- Figura: fuerza tangencial en función del tiempo ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/fuerzas_t.png}
+      \caption{Evolución temporal de la fuerza tangencial estimada en el
+            pedal. La periodicidad de la señal refleja el ciclo de pedaleo;
+            los incrementos escalonados corresponden a los escalones de
+            potencia del protocolo de rampa.}
+      \label{fig:fuerza_t}
+\end{figure}
+% -------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Optimización NSGA-II}
+\label{ssec:nsga2}
+% -----------------------------------------------------------------------------
+
+La etapa de optimización se realizó mediante el módulo \texttt{bike\_fit\_v2.py},
+que implementa el algoritmo NSGA-II (\textit{Non-dominated Sorting Genetic
+Algorithm II}) \citep{Deb2002NSGAII} para la optimización multiobjetivo del ajuste de la bicicleta.
+La formulación del problema consistió en tres objetivos a minimizar de forma
+simultánea: el coeficiente aerodinámico~$C_DA$, la frecuencia cardíaca media
+y un índice de riesgo de lesión calculado a partir de los ángulos articulares.
+El cromosoma de cada individuo codificó cuatro variables de diseño: altura
+del sillín, retroceso del sillín, altura del manillar y avance del manillar.
+
+La población inicial se generó de forma aleatoria dentro de los rangos
+antrópométricos del ciclista. En cada generación se aplicaron los operadores
+de selección por torneo, cruce~SBX (\textit{Simulated Binary Crossover}) y
+mutación polinomial. El criterio de parada fue la convergencia del frente de
+Pareto durante 50 generaciones consecutivas sin mejora.
+
+En la figura~\ref{fig:pareto_2d} se muestra el frente de Pareto obtenido al
+finalizar la optimización, proyectado sobre el plano
+$J_{\text{confort}}$--$J_{\text{power}}$. El valor de $J_{\text{aero}}$ se
+codifica mediante una escala de color que varía de violeta (área frontal
+reducida) a amarillo (área frontal elevada). La solución de compromiso,
+seleccionada como el individuo de menor distancia euclidiana normalizada al
+origen del espacio de objetivos, se indica con una estrella.
+
+% --- Figura: frente de Pareto 2D ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.82\textwidth]{./Figures/evol_solv_ag.png}
+      \caption{Frente de Pareto obtenido por el algoritmo NSGA-II proyectado
+            en el plano $J_{\text{confort}}$ (eje~$x$)–$J_{\text{power}}$
+            (eje~$y$). La escala de color representa $J_{\text{aero}}$
+            (violeta~$\rightarrow$ amarillo = menor~$\rightarrow$ mayor área
+            frontal estimada). La estrella dorada indica la solución de
+            compromiso seleccionada.}
+      \label{fig:pareto_2d}
+\end{figure}
+% ------------------------------------
+
+Los parámetros del algoritmo NSGA-II y las restricciones articulares
+empleadas se detallan en las tablas~\ref{tab:params_nsga2}
+y~\ref{tab:constraints_nsga2}.
+
+% --- Tabla: parámetros NSGA-II ---
+\begin{table}[H]
+      \caption{Parámetros del algoritmo NSGA-II implementado en
+            \texttt{bike\_fit\_v2.py} mediante la librería \texttt{pymoo}.}
+      \label{tab:params_nsga2}
+      \centering
+      \small
+      \begin{tabular}{p{0.30\linewidth}p{0.42\linewidth}p{0.18\linewidth}}
+            \toprule
+            \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
+            \texttt{pop\_size}       & Tamaño de la población                             & 300       \\
+            \texttt{n\_max\_gen}    & Límite máximo de generaciones                      & 300       \\
+            \texttt{seed}            & Semilla aleatoria (reproducibilidad)               & 42        \\
+            Operador de cruce        & \textit{Simulated Binary Crossover} (SBX)         & SBX       \\
+            $p_c$                    & Probabilidad de cruce                              & 0{,}90    \\
+            $\eta_c$                & Índice de distribución SBX                         & 10        \\
+            Operador de mutación     & Mutación polinomial (PM)                           & PM        \\
+            $p_m$                    & Probabilidad de mutación ($1/n_{\text{var}}$)     & 0{,}25    \\
+            $\eta_m$                & Índice de distribución PM                          & 15        \\
+            Duplicados               & Eliminación de individuos idénticos                & Sí        \\
+            \texttt{ftol}            & Tolerancia de convergencia en objetivos            & $10^{-4}$ \\
+            \texttt{xtol}            & Tolerancia de convergencia en variables            & $10^{-4}$ \\
+            Ventana de estancamiento & Generaciones sin mejora para detener               & 20        \\
+            Restricción dura rodilla & Ángulo máximo de rodilla en BDC                    & 147°      \\
+            \midrule
+            \multicolumn{3}{l}{\textit{Espacio de búsqueda (variables de decisión):}} \\
+            $\Delta\mathrm{hip}_x$      & Retroceso/avance del sillín  & $[-15,\;+15]$~mm \\
+            $\Delta\mathrm{hip}_y$      & Elevación del sillín         & $[-50,\;+50]$~mm \\
+            $\Delta\mathrm{hb\_reach}$ & Alcance del manillar         & $[-25,\;+25]$~mm \\
+            $\Delta\mathrm{hb\_stack}$ & Altura del manillar          & $[-30,\;+30]$~mm \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+
+% --- Tabla: restricciones articulares NSGA-II ---
+\begin{table}[H]
+      \caption{Rangos articulares seguros empleados en la función objetivo
+            $J_{\text{confort}}$. El estadístico indica el valor del ciclo
+            sobre el que se evalúa la restricción.}
+      \label{tab:constraints_nsga2}
+      \centering
+      \small
+      \begin{tabular}{p{0.16\linewidth}cccp{0.24\linewidth}}
+            \toprule
+            \textbf{Articulación} & \textbf{Mín (°)} & \textbf{Máx (°)} &
+            \textbf{Peso $w$} & \textbf{Estadístico} \\
+            \midrule
+            Rodilla    & 138 & 145 & 20{,}0 & Máximo del ciclo (BDC) \\
+            Cadera     & 50  & 70  & 10{,}0 & Mínimo del ciclo (TDC) \\
+            Hombro     & 80  & 100 &  2{,}0 & Media del ciclo        \\
+            Tobillo    & 90  & 112 &  5{,}0 & Máximo del ciclo (BDC) \\
+            ROM cadera & 40  & 70  &  8{,}0 & Rango del ciclo        \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+% -----------------------------------------------
+
+% =============================================================================
+\section{Análisis de resultados}
+\label{sec:analisis_resultados}
+% =============================================================================
+
+En esta sección se analizan los resultados obtenidos por el algoritmo NSGA-II.
+Se presentan los ajustes recomendados por la solución de compromiso, los
+valores de las funciones objetivo alcanzados y la interpretación biomecánica
+de los cambios propuestos, contrastando cada recomendación con el análisis
+visual de los ángulos articulares y con las condiciones de configuración
+iniciales de la bicicleta.
+
+Cabe señalar que, previo a la ejecución del sistema, el único ajuste
+realizado sobre la bicicleta fue la altura del sillín, determinada mediante la
+fórmula empírica $h_{\text{sillín}} = 0{,}87 \times L_{\text{entrepierna}}$,
+donde $L_{\text{entrepierna}}$ es la longitud de la entrepierna del ciclista.
+El resto de las dimensiones de la bicicleta (alcance y altura del manillar,
+posición horizontal del sillín) correspondían a la configuración de fábrica,
+sin ningún ajuste previo. Este punto de partida es relevante para la
+interpretación de los resultados, ya que los cambios recomendados parten de
+una posición no ajustada.
+
+% -----------------------------------------------------------------------------
+\subsection{Solución de compromiso y ajustes recomendados}
+\label{ssec:solucion_compromiso}
+% -----------------------------------------------------------------------------
+
+Una vez finalizada la optimización, la solución de compromiso se seleccionó
+como el individuo del frente de Pareto de menor distancia euclidiana
+normalizada al origen del espacio de objetivos. Los valores de las tres
+funciones objetivo correspondientes a dicha solución se presentan en la
+tabla~\ref{tab:objetivos_nsga2}, mientras que los ajustes geométricos
+recomendados se detallan en la tabla~\ref{tab:ajustes_nsga2}.
+
+% --- Tabla: valores de las funciones objetivo ---
+\begin{table}[H]
+      \caption{Valores de las funciones objetivo de la solución de compromiso
+            obtenida por el algoritmo NSGA-II.}
+      \label{tab:objetivos_nsga2}
+      \centering
+      \small
+      \begin{tabular}{p{0.22\linewidth}p{0.52\linewidth}c}
+            \toprule
+            \textbf{Función objetivo} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
+            $J_{\text{confort}}$ & Índice de riesgo de lesión articular & 3052{,}88 \\
+            $J_{\text{power}}$   & Índice de eficiencia de pedaleo (menor = mejor)  & 1{,}09 \\
+            $J_{\text{aero}}$    & Área frontal estimada normalizada (menor = mejor) & 0{,}31 \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+% ------------------------------------------------
+
+% --- Tabla: ajustes geométricos recomendados ---
+\begin{table}[H]
+      \caption{Ajustes geométricos recomendados por la solución de compromiso.
+            Los desplazamientos positivos en la dirección vertical indican
+            movimiento hacia arriba; los negativos, hacia abajo. En la
+            dirección horizontal, los valores positivos corresponden a un
+            movimiento hacia atrás y los negativos a un acortamiento del
+            alcance.}
+      \label{tab:ajustes_nsga2}
+      \centering
+      \small
+      \begin{tabular}{p{0.16\linewidth}p{0.42\linewidth}cc}
+            \toprule
+            \textbf{Componente} & \textbf{Ajuste} & \textbf{Magnitud (mm)} &
+            \textbf{Dirección} \\
+            \midrule
+            Sillín & Posición horizontal (\textit{fore/aft}) & 13{,}5 & Hacia atrás \\
+            Sillín & Altura                                  & 11{,}4 & Subir       \\
+            Manillar & Alcance (\textit{reach})              & 23{,}0 & Acortar     \\
+            Manillar & Altura (\textit{stack})               & 26{,}4 & Bajar       \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+% -----------------------------------------------
+
+Las figuras~\ref{fig:ang_avt} y~\ref{fig:ang_opt} muestran la posición del
+ciclista en el configuración actual y en la configuración optimizada,
+respectivamente, con los ángulos articulares superpuestos. La comparación
+visual permite apreciar el efecto global de los ajustes propuestos sobre la
+postura en la bicicleta.
+
+% --- Figura: posición actual con ángulos ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/ang_act.png}
+      \caption{Posición actual del ciclista con los ángulos articulares
+            superpuestos. Los valores corresponden a la cinemática registrada
+            durante la sesión de adquisición, sin ningún ajuste de
+            configuración previo a excepción de la altura del sillín.}
+      \label{fig:ang_avt}
+\end{figure}
+% -------------------------------------------
+
+% --- Figura: posición optimizada con ángulos ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/ang_opt.png}
+      \caption{Posición del ciclista con los ajustes recomendados por la
+            solución de compromiso del algoritmo NSGA-II. Los ángulos
+            articulares fueron recalculados mediante cinemática inversa sobre
+            el gemelo digital, aplicando los desplazamientos de los puntos
+            de anclaje de sillín y manillar.}
+      \label{fig:ang_opt}
+\end{figure}
+% -----------------------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Análisis del ángulo de cadera y postura aerodinámica}
+\label{ssec:analisis_cadera}
+% -----------------------------------------------------------------------------
+
+En la figura~\ref{fig:cadera_torso} se presenta la comparación de los ángulos
+de cadera y torso entre la configuración actual y la optimizada. Se observa
+una reducción significativa en el ángulo de cadera, lo que corresponde a una
+postura más cerrada y, en consecuencia, más aerodinámica. Este resultado es
+coherente con los valores de $J_{\text{aero}}$ obtenidos y con el análisis
+visual de la posición del ciclista: en la posición actual se aprecia una
+inclinación de torso moderada que, tras la aplicación de los ajustes de
+alcance y altura del manillar, se acentúa hacia una postura más inclinada
+hacia adelante, propia de una geometría optimizada para minimizar el área
+frontal.
+
+% --- Figura: ángulo de cadera y torso ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/torso.png}
+      \caption{Comparación del del ángulo de torso entre
+            la configuración actual (rojo) y la configuración optimizada
+            (verde). La reducción en el ángulo de cadera refleja una postura
+            más cerrada y aerodinámica.}
+      \label{fig:cadera_torso}
+\end{figure}
+% ----------------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Análisis del ángulo de rodilla}
+\label{ssec:analisis_rodilla}
+% -----------------------------------------------------------------------------
+
+En la figura~\ref{fig:angulo_rodilla} se presenta el ángulo de rodilla en
+función de la fase del ciclo de pedaleo, expresada en grados de~0 a~360.
+Cada punto corresponde a una muestra real de la sesión (configuración actual)
+o a un valor recalculado mediante cinemática inversa sobre el gemelo digital
+(configuración optimizada). Es importante destacar que el punto de anclaje
+del pedal permanece fijo durante la optimización; únicamente se modifican
+las posiciones del sillín y del manillar, por lo que los cambios en el ángulo
+de rodilla son consecuencia de la variación en la posición de la cadera.
+
+% --- Figura: ángulo de rodilla ---
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{./Figures/rodilla.png}
+      \caption{Ángulo de la articulación de rodilla en función de la
+            fase del ciclo de pedaleo (0°–360°). Los puntos rojos
+            corresponden a las muestras reales de la sesión
+            , los puntos verdes, a los valores recalculados mediante
+            cinemática inversa sobre el gemelo digital con los ajustes
+            recomendados.}
+      \label{fig:angulo_rodilla}
+\end{figure}
+% ---------------------------------
+
+% -----------------------------------------------------------------------------
+\subsection{Coherencia de los ajustes con la configuración de la bicicleta}
+\label{ssec:coherencia_ajustes}
+% -----------------------------------------------------------------------------
+
+Los ajustes recomendados resultan coherentes tanto con el análisis cinemático
+como con las características conocidas de la bicicleta. En lo que respecta al
+alcance del manillar, la bicicleta contaba con la potencia de mayor longitud
+disponible para esa marca (120~mm), lo que generaba una extensión excesiva de
+los brazos y adormecimiento de manos durante los esfuerzos prolongados.
+La reducción de 23~mm recomendada por el algoritmo corrige directamente esta
+condición y se alinea con las sensaciones subjetivas reportadas por el
+ciclista.
+
+En cuanto a la altura del manillar, la bicicleta disponía de cuatro
+espaciadores bajo el potencia, lo que resultaba en una posición del manillar
+elevada en exceso para un perfil de uso orientado al rendimiento. La
+reducción de 26{,}4~mm propuesta por el algoritmo equivale a retirar
+entre uno y dos espaciadores, lo que es un ajuste razonable y de fácil
+implementación.
+
+Finalmente, el retroceso y la elevación del sillín refuerzan la coherencia
+global de la solución: el desplazamiento hacia atrás de 13{,}5~mm corrige
+la posición horizontal de la cadera sobre el eje del pedalier, mientras que
+la elevación de 11{,}4~mm complementa el ajuste inicial realizado
+mediante la fórmula $0{,}87 \times L_{\text{entrepierna}}$, que puede
+subestimar la altura óptima dependiendo de la morfología del ciclista y del
+tipo de pedales utilizados.

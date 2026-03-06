@@ -1,37 +1,96 @@
 % Chapter Template
 
-\chapter{Conclusiones} % Main chapter title
+\chapter{Conclusiones}
 
-\label{Chapter5} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
-Todos los capítulos deben comenzar con un breve párrafo introductorio que indique cuál es el contenido que se encontrará al leerlo.  La redacción sobre el contenido de la memoria debe hacerse en presente y todo lo referido al proyecto en pasado, siempre de modo impersonal.
+\label{Chapter5}
 
-
-%----------------------------------------------------------------------------------------
+En este capítulo se presentan las conclusiones del trabajo realizado, el grado
+de cumplimiento de los requerimientos, las desviaciones respecto de la
+planificación original, los riesgos que se manifestaron durante el desarrollo y
+las lecciones aprendidas sobre las técnicas empleadas.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 1
 %----------------------------------------------------------------------------------------
 
-\section{Conclusiones generales }
+\section{Conclusiones generales}
 
-La idea de esta sección es resaltar cuáles son los principales aportes del trabajo realizado y cómo se podría continuar. Debe ser especialmente breve y concisa. Es buena idea usar un listado para enumerar los logros obtenidos.
-
-En esta sección no se deben incluir ni tablas ni gráficos.
-
-Algunas preguntas que pueden servir para completar este capítulo:
+El objetivo principal del trabajo fue el desarrollo de un sistema integral de
+análisis y optimización biomecánica para ciclistas, lo que integra visión por
+computadora, modelos biomecánicos y algoritmos evolutivos multiobjetivo. Los
+principales logros obtenidos fueron los siguientes:
 
 \begin{itemize}
-\item ¿Cuál es el grado de cumplimiento de los requerimientos?
-\item ¿Cuán fielmente se puedo seguir la planificación original (cronograma incluido)?
-\item ¿Se manifestó algunos de los riesgos identificados en la planificación? ¿Fue efectivo el plan de mitigación? ¿Se debió aplicar alguna otra acción no contemplada previamente?
-\item Si se debieron hacer modificaciones a lo planificado ¿Cuáles fueron las causas y los efectos?
-\item ¿Qué técnicas resultaron útiles para el desarrollo del proyecto y cuáles no tanto?
+    \item Se desarrolló un pipeline completo de adquisición, preprocesamiento y análisis
+          de datos biomecánicos a partir de video, con registro temporal sincronizado con
+          las métricas del rodillo inteligente.
+    \item Se resolvió el problema de \textit{motion blur} mediante la sustitución de la
+          cámara original por un dispositivo Google Pixel 8~Pro, con mejoras en la
+          iluminación y la estabilidad del soporte.
+    \item Se aplicó la estimación de pose con MediaPipe BlazePose sobre más de 26.000
+          fotogramas, con superposición visual de los puntos clave para la verificación
+          del ingeniero.
+    \item Se incorporó un filtro de Kalman univariado para la reducción del ruido en las
+          series temporales de los puntos clave, con preservación de la información
+          biomecánica relevante.
+    \item Se construyó un gemelo digital del ciclista con cinemática inversa, lo que
+          permitió simular el impacto de distintas configuraciones de la bicicleta sobre
+          las métricas biomecánicas.
+    \item Se implementó el algoritmo NSGA-II para la optimización multiobjetivo de la
+          posición del ciclista, con balance entre confort, potencia y aerodinámica sobre
+          el frente de Pareto.
+    \item Se incorporó la morfología del ciclista como variable de entrada en el modelo
+          de optimización, lo que permitió la generación de recomendaciones
+          personalizadas.
+    \item Se desarrolló una interfaz web lo que guía al usuario en todo el proceso, desde
+          la captura de video hasta la descarga del reporte de recomendaciones.
+    \item Se alcanzó un grado de cumplimiento de los requerimientos del 89\,\% (26 de 29
+          criterios de aceptación cumplidos), con un criterio parcialmente cumplido y dos
+          no realizados, correspondientes a la suite de pruebas automatizadas.
 \end{itemize}
 
+La planificación original se siguió de manera satisfactoria hasta la etapa de
+selección de cámara, donde surgieron inconvenientes lo que retrasaron el
+cronograma. Durante esa etapa se manifestaron dos de los riesgos identificados
+en la planificación: la baja calidad de imagen por efecto de \textit{motion
+    blur} y la consecuente inexactitud del modelo de pose. La cámara seleccionada
+inicialmente no fue diseñada para la captura a alta velocidad, lo que derivó en
+imágenes borrosas no detectables por el modelo. El plan de mitigación resultó
+efectivo: se reemplazó el dispositivo de captura por el Google Pixel 8~Pro, se
+mejoró la iluminación del entorno y se aumentó la estabilidad del soporte, lo
+que permitió retomar el cronograma con un retraso acotado.
+
+En cuanto a las técnicas empleadas, la metodología CRISP-DM resultó de utilidad
+para la organización y el avance iterativo del proyecto, ya que proveyó una
+guía clara para cada etapa del desarrollo. El modelo de pose HRNet, utilizado
+en la etapa inicial, no se adaptó a las condiciones de captura del entorno, por
+lo que fue reemplazado por MediaPipe BlazePose, lo que demostró mayor robustez
+bajo las condiciones reales de trabajo.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
 %----------------------------------------------------------------------------------------
+
 \section{Próximos pasos}
 
-Acá se indica cómo se podría continuar el trabajo más adelante.
+A partir de los resultados obtenidos, se identifican las siguientes líneas de
+trabajo para la continuación del proyecto:
+
+\begin{itemize}
+    \item La incorporación de una suite de pruebas automatizadas (unitarias, de
+          integración y de extremo a extremo) para garantizar la mantenibilidad y la
+          calidad del sistema a largo plazo.
+    \item La sustitución del dispositivo de captura por una cámara de mayor precisión y
+          frecuencia de muestreo, lo que permitiría obtener series temporales más densas
+          y mejorar la calidad del análisis biomecánico.
+    \item La extensión del modelo biomecánico para la inclusión de las extremidades
+          superiores y el análisis del tren superior del ciclista.
+    \item La validación del sistema con una muestra ampliada de ciclistas de distintos
+          niveles y morfologías, con el fin de evaluar la generalización de las
+          recomendaciones.
+    \item La integración de sensores adicionales, como plataformas de fuerza en los
+          pedales, para enriquecer el modelo biomecánico con datos de carga real.
+    \item El despliegue del sistema en un entorno de producción accesible para
+          profesionales del ciclismo, con soporte para múltiples usuarios y sesiones
+          concurrentes.
+\end{itemize}
