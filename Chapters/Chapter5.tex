@@ -24,8 +24,8 @@ principales logros obtenidos fueron los siguientes:
     \item Se desarrolló un pipeline completo de adquisición, preprocesamiento y análisis
           de datos biomecánicos a partir de video, con registro temporal sincronizado con
           las métricas del rodillo inteligente.
-    \item Se resolvió el problema de \textit{motion blur} mediante la sustitución de la
-          cámara original por un dispositivo Google Pixel 8~Pro, con mejoras en la
+    \item Se resolvió el problema de desenfoque de movimiento mediante la sustitución de
+          la cámara original por un dispositivo Google Pixel 8~Pro, con mejoras en la
           iluminación y la estabilidad del soporte.
     \item Se aplicó la estimación de pose con MediaPipe BlazePose sobre más de 26.000
           fotogramas, con superposición visual de los puntos clave para la verificación
@@ -44,28 +44,16 @@ principales logros obtenidos fueron los siguientes:
           personalizadas.
     \item Se desarrolló una interfaz web lo que guía al usuario en todo el proceso, desde
           la captura de video hasta la descarga del reporte de recomendaciones.
-    \item Se alcanzó un grado de cumplimiento de los requerimientos del 89\,\% (26 de 29
-          criterios de aceptación cumplidos), con un criterio parcialmente cumplido y dos
+    \item Se alcanzó un grado de cumplimiento de los requerimientos del 89\,\%, con 26 de
+          29 criterios de aceptación cumplidos, un criterio parcialmente cumplido y dos
           no realizados, correspondientes a la suite de pruebas automatizadas.
 \end{itemize}
 
 La planificación original se siguió de manera satisfactoria hasta la etapa de
-selección de cámara, donde surgieron inconvenientes lo que retrasaron el
-cronograma. Durante esa etapa se manifestaron dos de los riesgos identificados
-en la planificación: la baja calidad de imagen por efecto de \textit{motion
-    blur} y la consecuente inexactitud del modelo de pose. La cámara seleccionada
-inicialmente no fue diseñada para la captura a alta velocidad, lo que derivó en
-imágenes borrosas no detectables por el modelo. El plan de mitigación resultó
-efectivo: se reemplazó el dispositivo de captura por el Google Pixel 8~Pro, se
-mejoró la iluminación del entorno y se aumentó la estabilidad del soporte, lo
-que permitió retomar el cronograma con un retraso acotado.
-
-En cuanto a las técnicas empleadas, la metodología CRISP-DM resultó de utilidad
-para la organización y el avance iterativo del proyecto, ya que proveyó una
-guía clara para cada etapa del desarrollo. El modelo de pose HRNet, utilizado
-en la etapa inicial, no se adaptó a las condiciones de captura del entorno, por
-lo que fue reemplazado por MediaPipe BlazePose, lo que demostró mayor robustez
-bajo las condiciones reales de trabajo.
+selección de cámara, donde se manifestaron dos de los riesgos identificados: la
+baja calidad de imagen por desenfoque de movimiento y la consecuente
+inexactitud del modelo de pose. El plan de mitigación resultó efectivo y
+permitió retomar el cronograma con un retraso acotado.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -77,8 +65,8 @@ A partir de los resultados obtenidos, se identifican las siguientes líneas de
 trabajo para la continuación del proyecto:
 
 \begin{itemize}
-    \item La incorporación de una suite de pruebas automatizadas (unitarias, de
-          integración y de extremo a extremo) para garantizar la mantenibilidad y la
+    \item La incorporación de una suite de pruebas automatizadas, unitarias, de
+          integración y de extremo a extremo, para garantizar la mantenibilidad y la
           calidad del sistema a largo plazo.
     \item La sustitución del dispositivo de captura por una cámara de mayor precisión y
           frecuencia de muestreo, lo que permitiría obtener series temporales más densas
@@ -89,13 +77,9 @@ trabajo para la continuación del proyecto:
           niveles y morfologías, con el fin de evaluar la generalización de las
           recomendaciones.
     \item La integración de sensores de potencia avanzados, como los pedales
-          Garmin Rally RK\,200, que proporcionan métricas de alto valor biomecánico:
-          pico de fuerza por fase de pedaleo, balance de potencia izquierda/derecha
-          (L/R), eficiencia de torque, tiempo en la zona de fuerza máxima y fase de
-          pedaleo efectivo (\textit{Power Phase}). La incorporación de estas señales
-          permitiría calibrar y validar el modelo de fuerzas estimado actualmente por
-          cinemática inversa, enriqueciendo las funciones objetivo de la
-          optimización con datos de carga real.
+          Garmin Rally RK\,200, para calibrar y validar el modelo de fuerzas estimado
+          por cinemática inversa, lo que enriquecería las funciones objetivo con datos de
+          carga real.
     \item El despliegue del sistema en un entorno de producción accesible para
           profesionales del ciclismo, con soporte para múltiples usuarios y sesiones
           concurrentes.

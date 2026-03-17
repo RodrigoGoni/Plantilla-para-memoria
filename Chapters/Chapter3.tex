@@ -152,6 +152,7 @@ generados por la red neuronal en etapas posteriores:
 \end{itemize}
 
 \subsection{Entorno de análisis y telemetría}
+\label{ssec:telemetria}
 Simultáneamente, se implementó la recolección de datos de rendimiento mediante
 protocolos inalámbricos ANT+ \citep{ANTPlus} y BLE (\textit{Bluetooth Low
   Energy}) \citep{Gomez2012BLE}. El sistema se implementó sobre la plataforma
@@ -177,6 +178,7 @@ Las variables capturadas incluyeron potencia (W), cadencia (RPM), velocidad
 virtual (km/h) y frecuencia cardíaca (BPM) y derivadas.
 
 \subsection{Sincronización temporal (algoritmo de correlación)}
+\label{ssec:sync_temporal}
 El desafío técnico principal en esta etapa fue la sincronización. Dado que el
 video (muestreado a 60-240 Hz) y la telemetría (muestreada a 4 Hz) operan con
 relojes independientes y latencias de transmisión variables, se implementó un
@@ -339,7 +341,7 @@ dinámica inversa.
 En esta etapa se predijo el comportamiento del sistema ciclista-bicicleta bajo
 diferentes configuraciones geométricas sin necesidad de intervención física en
 túnel de viento. El sistema estimó el área frontal proyectada ($A_{proj}$)
-utilizando una red de segmentación semántica sobre la vista lateral del
+mediante una red de segmentación semántica aplicada sobre la vista lateral del
 ciclista.
 
 Aunque la vista lateral no captura directamente el área frontal, se aplicaron
@@ -696,7 +698,7 @@ Esta formulación se deriva de la relación fuerza-fatiga. Las unidades motoras
 musculares siguen el principio de tamaño de Henneman \citep{Henneman1965}: las fibras tipo II se
 reclutan solo cuando la demanda de fuerza es alta. Al minimizar la suma de los
 torques al cuadrado, el sistema busca configuraciones que distribuyan la carga
-de manera óptima, minimizando los picos de fuerza y favoreciendo el uso de
+de manera óptima, para minimizar los picos de fuerza y favorecer el uso de
 fibras tipo I.
 
 Matemáticamente, esto favorece configuraciones que optimizan los brazos de
@@ -765,22 +767,58 @@ flotantes.
 
 \begin{table}[h]
   \centering
-  \caption{Configuración de operadores del algoritmo genético}
+  \caption{Configuración de operadores del algoritmo genético NSGA-II implementado.}
   \label{tab:configuracion_ag}
-  \begin{tabular}{p{0.2\textwidth} p{0.25\textwidth} p{0.45\textwidth}}
+  \begin{tabular}{c p{0.28\textwidth} p{0.38\textwidth}}
     \toprule
-    Componente               & Selección                           & Justificación técnica                                                                                                                                             \\
+    N° & Componente               & Selección / Valor                           \\
     \midrule
-    Representación           & Vector real                         & Evita la pérdida de precisión por discretización y el problema de los abismos de Hamming \citep{goldberg1989} al tratar variables continuas métricas.                                  \\
-    Inicialización           & Muestreo de hipercubo latino        & Garantiza una cobertura estadística uniforme del espacio de búsqueda $\Omega$ en la generación inicial, superior al muestreo aleatorio simple.                    \\
-    Selección                & Torneo binario                      & Ofrece un control preciso de la presión selectiva. Permite mantener diversidad genética y es computacionalmente eficiente $O(N)$.                                 \\
-    Cruce                    & \textit{Simulated Binary Crossover} & Diseñado para dominios continuos. Imita la distribución de probabilidad del cruce de un punto, respetando la correlación entre variables. Probabilidad $p_c=0.9$. \\
-    Mutación                 & Polinómica                          & Introduce pequeñas perturbaciones locales para el ajuste fino. Crítico para escapar de óptimos locales planos. Probabilidad $p_m=1/L$.                            \\
-    Elitismo                 & Estricto                            & Garantiza que la mejor solución encontrada nunca se pierda, asegurando matemáticamente la no regresión de la aptitud.                                             \\
-    Gestión de restricciones & Penalización de muerte súbita       & Si una solución viola una restricción geométrica dura, se le asigna un \textit{fitness} infinito, eliminándola del acervo genético.                               \\
+    1  & Representación           & Vector real (\texttt{float64})              \\
+    2  & Inicialización           & Muestreo aleatorio uniforme (\texttt{FloatRandomSampling}) \\
+    3  & Selección                & Torneo binario (por defecto NSGA-II)        \\
+    4  & Cruce                    & \textit{Simulated Binary Crossover} (SBX), $p_c=0{,}9$, $\eta_c=10$ \\
+    5  & Mutación                 & Polinómica (PM), $p_m=1/n_{\text{var}}=0{,}25$, $\eta_m=15$ \\
+    6  & Elitismo                 & Implícito via \textit{non-dominated ranking} de NSGA-II \\
+    7  & Gestión de restricciones & Penalización finita + dominación por restricción (\texttt{out[``G'']}) \\
+    8  & Eliminación de duplicados & Activa (\texttt{eliminate\_duplicates=True}) \\
     \bottomrule
   \end{tabular}
 \end{table}
+
+La elección de cada componente se justifica a continuación.
+
+\begin{enumerate}
+  \item Codificación en vector real: evita la pérdida de precisión por
+        discretización y el problema de los abismos de Hamming
+        \citep{goldberg1989} al tratar variables continuas métricas.
+  \item Inicialización: se realizó mediante muestreo aleatorio uniforme
+        sobre el espacio de diseño acotado, lo que garantiza una exploración
+        amplia de $\Omega$ desde la primera generación.
+  \item Torneo binario: operador de selección por defecto en NSGA-II,
+        ofrece un control preciso de la presión selectiva y permite mantener
+        diversidad genética con un coste computacional $O(N)$.
+  \item Operador SBX: fue diseñado específicamente para dominios
+        continuos. Imita la distribución estadística del cruce de un punto con
+        preservación de la correlación entre variables. El índice $\eta_c=10$
+        favorece la exploración global.
+  \item Mutación polinómica: introduce perturbaciones locales
+        controladas. La probabilidad $p_m=1/n_{\text{var}}$ asegura que en
+        promedio se mute una variable por individuo, y $\eta_m=15$ otorga una
+        perturbación moderada para escapar de óptimos locales planos.
+  \item Elitismo: en NSGA-II es inherente al mecanismo de selección
+        por frente no dominado y distancia de hacinamiento. Las soluciones del
+        frente de Pareto actual siempre sobreviven a la siguiente generación.
+  \item Gestión de restricciones: se emplearon dos mecanismos
+        complementarios. Una penalización finita de alto valor ($10^4$) para
+        individuos con alta tasa de fallos de cinemática inversa, y una
+        restricción dura sobre el ángulo máximo de rodilla
+        ($\theta_{\text{rodilla}} \leq 147°$) modelada como desigualdad en
+        \texttt{out[``G'']}, lo que activa el \textit{constraint domination
+          ranking} de NSGA-II para excluir soluciones infactibles del frente de
+        Pareto.
+  \item Eliminación de duplicados: garantiza diversidad genética al
+        descartar individuos idénticos en cada generación.
+\end{enumerate}
 
 \subsubsection{Estrategia de escalarización}
 
@@ -811,8 +849,8 @@ teoría de control, esta etapa corresponde al actuador.
 Dado que el sistema no es mecatrónico, el actuador es el ser humano. El reporte
 debe cerrar la brecha semántica entre los resultados numéricos del
 optimizador y las acciones físicas requeridas en el mundo real. Si el reporte
-fuera confuso, el usuario ejecutaría mal los cambios, introduciendo error en el
-sistema. Por tanto, el diseño de esta sección se basó en principios de
+fuera confuso, el usuario ejecutaría mal los cambios y daría lugar a la introducción de errores.
+ Por tanto, el diseño de esta sección se basó en principios de
 interacción humano computadora.
 
 \subsection{Transformación de datos a conocimiento}
@@ -825,7 +863,7 @@ genético para generar directrices operativas.
   \item Información: se compara el óptimo con la medida actual
         $\mathbf{x}_{\text{actual}}$ extraída de la visión por computador calibrada.
         \[ \Delta \mathbf{x} = \mathbf{x}^* - \mathbf{x}_{\text{actual}} \quad \text{Ejemplo: } \Delta h_{\text{sillin}} = +5.2 \text{ mm}. \]
-  \item Conocimiento: reportar "+5.2 mm" sería un error de diseño por falsa precisión.
+  \item Conocimiento: reportar +5 mm sería un error de diseño por falsa precisión.
         Las herramientas manuales y el error de paralaje humano impiden ajustes con tal
         precisión. Además, existen zonas de insensibilidad fisiológica. Se implementó
         un filtro de banda muerta:
@@ -860,7 +898,7 @@ lingüísticas. La tabla \ref{tab:acciones} resume las acciones necesarias.
 
 \begin{table}[h]
   \centering
-  \caption{Tabla de acciones}
+  \caption{Tabla de acciones.}
   \label{tab:acciones}
   \small
   \begin{tabular}{p{0.14\linewidth}ccp{0.22\linewidth}r}
