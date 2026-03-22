@@ -27,6 +27,8 @@
 \usepackage{eso-pic}        % Permite agregar fondos
 \usepackage{hyperref}       % Manejo de hipervínculos y marcadores
 \usepackage{caption}        % Permite footnotes en captions de figuras
+\usepackage{subcaption}     % Subfiguras con subcaptions independientes
+\usepackage[colorinlistoftodos]{todonotes} % Figuras y notas pendientes
 
 % Redefinición de caracteres problemáticos en marcadores
 \hypersetup{
@@ -89,7 +91,21 @@ En la presente memoria se describe el desarrollo de un sistema inteligente y per
 
 \begin{acknowledgements}
 \vspace{1.5cm}
-Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONAL}.
+
+Quiero expresar mi más sincero agradecimiento al MSc.\ Fernando Corteggiano,
+director de esta memoria, por su guía permanente, su generosidad para
+compartir conocimiento y su disposición en cada etapa del desarrollo de
+este trabajo.
+
+Agradezco también al PhD.\ David Deyong, miembro del jurado, por su
+dedicación en la evaluación de este trabajo y por los aportes y
+observaciones que contribuyeron a enriquecerlo.
+
+Finalmente, y de manera muy especial, agradezco a mi esposa María Milagros,
+compañera incondicional de cada día, cuyo apoyo, paciencia y amor hicieron
+posible que pudiera dedicarme a este posgrado. Sin ella, nada de esto
+hubiera sido posible.
+
 \end{acknowledgements}
 
 %----------------------------------------------------------------------------------------
@@ -103,8 +119,10 @@ Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONA
 %----------------------------------------------------------------------------------------
 % Dedicatoria
 %----------------------------------------------------------------------------------------
+\dedicatory{\textbf{Dedicado a mi esposa María Milagros,\\
+por estar a mi lado todos los días\\
+y hacer posible este camino.}}
 
-\dedicatory{\textbf{Dedicado a... [OPCIONAL]}}
 
 %----------------------------------------------------------------------------------------
 % Capítulos

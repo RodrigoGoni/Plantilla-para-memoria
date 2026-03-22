@@ -228,11 +228,9 @@ tabla~\ref{tab:calibracion}.
       \begin{tabular}{p{0.42\linewidth}p{0.25\linewidth}p{0.18\linewidth}}
             \toprule
             \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
-            \multicolumn{3}{l}{Calibración de la cámara:} \\
             Referencia de calibración  & Rueda (estándar 700c)        & 622~mm           \\
             Resolución de la imagen    & Ancho $\times$ alto          & 1280$\times$720~px \\
             Factor de conversión       & Píxeles por milímetro        & 2{,}853~px/mm    \\
-            \multicolumn{3}{l}{Longitudes de segmentos rígidos:} \\
             Tibia                      & Tobillo--rodilla             & 440{,}99~mm      \\
             Fémur                      & Rodilla--cadera              & 430{,}48~mm      \\
             Brazo                      & Hombro--codo                 & 277{,}58~mm      \\
@@ -298,7 +296,7 @@ procesamiento, en el orden en que se ejecutan sobre los datos de la sesión.
 La sincronización temporal entre los fotogramas de video y la telemetría del
 rodillo se realizó mediante el módulo \texttt{sync.py}, conforme al algoritmo
 descrito en la sección~\ref{ssec:sync_temporal}. Se empleó la búsqueda del
-vecino más cercano con una tolerancia máxima de 500~ms; los fotogramas sin
+vecino más cercano con una tolerancia máxima de 500~ms. Los fotogramas sin
 muestra de telemetría asociada dentro de ese intervalo se excluyeron del
 análisis posterior.
 
@@ -334,16 +332,23 @@ de potencia, cadencia y frecuencia cardíaca.
 Previo al cálculo biomecánico, las trayectorias de los puntos clave
 fueron refinadas mediante el módulo \texttt{keypoint\_processor.py},
 conforme al procedimiento descrito en la sección~\ref{subsec:cinematica_angular}.
-El procesamiento comprendió tres pasos secuenciales: descarte de puntos clave
-con visibilidad inferior a $0{,}50$; eliminación de valores atípicos espaciales
-mediante Z-score (umbral $3{,}0$) con reemplazo por interpolación lineal entre
-el fotograma válido anterior y el posterior; y suavizado mediante filtro de
-Kalman univariado aplicado de forma independiente a cada coordenada y punto clave.
+El procesamiento comprendió tres pasos secuenciales:
+
+\begin{enumerate}
+  \item Descarte de puntos clave con visibilidad inferior a $0{,}50$.
+  \item Eliminación de valores atípicos espaciales mediante Z-score (umbral
+        $3{,}0$), con reemplazo por interpolación lineal entre el fotograma
+        válido anterior y el posterior.
+  \item Suavizado mediante filtro de Kalman univariado, aplicado de forma
+        independiente a cada coordenada y punto clave.
+\end{enumerate}
 
 La trayectoria de la rodilla antes del filtrado presenta una dispersión
 apreciable (figura~\ref{fig:trayectoria_rodilla}). En la
 figura~\ref{fig:kalman_tray} se muestra la trayectoria espacial $(x,y)$
-de la rodilla antes y después de aplicar el filtro de Kalman.
+de la rodilla antes y después de aplicar el filtro de Kalman. El suavizado
+reduce el ruido en el dominio espacial sin alterar la trayectoria general
+del movimiento.
 
 % --- Figura: trayectoria x-y de la rodilla (con y sin filtro de Kalman) ---
 \begin{figure}[H]
@@ -408,7 +413,7 @@ pedaleo y identificar zonas de inestabilidad cinemática.
 % -----------------------------------------------------------------------------
 
 Las fuerzas de reacción en los pedales se estimaron mediante el módulo
-\texttt{forces.py}, conforme al modelo de dinámica inversa plana descrito
+\texttt{forces . py}, conforme al modelo de dinámica inversa plana descrito
 en la sección~\ref{subsec:dinamica_inversa}. Se calcularon las componentes
 tangencial~$F_t$ y radial~$F_r$ de la fuerza sobre el pedal en cada
 fotograma a partir de los datos de potencia, cadencia y cinemática articular.
@@ -486,7 +491,19 @@ y~\ref{tab:constraints_nsga2}.
             \texttt{xtol}            & Tolerancia de convergencia en variables            & $10^{-4}$ \\
             Ventana de estancamiento & Generaciones sin mejora para detener               & 20        \\
             Restricción dura rodilla & Ángulo máximo de rodilla en BDC                    & 147°      \\
-            \multicolumn{3}{l}{Espacio de búsqueda, variables de decisión:} \\
+            \bottomrule
+      \end{tabular}
+\end{table}
+
+% --- Tabla: espacio de búsqueda NSGA-II ---
+\begin{table}[H]
+      \caption{Variables de decisión y espacio de búsqueda del algoritmo NSGA-II.}
+      \label{tab:espacio_nsga2}
+      \centering
+      \small
+      \begin{tabular}{p{0.30\linewidth}p{0.42\linewidth}p{0.18\linewidth}}
+            \toprule
+            \textbf{Variable} & \textbf{Descripción} & \textbf{Rango} \\
             $\Delta\mathrm{hip}_x$      & Retroceso/avance del sillín  & $[-15,\;+15]$~mm \\
             $\Delta\mathrm{hip}_y$      & Elevación del sillín         & $[-50,\;+50]$~mm \\
             $\Delta\mathrm{hb\_reach}$ & Alcance del manillar         & $[-25,\;+25]$~mm \\
@@ -579,8 +596,13 @@ recomendados se detallan en la tabla~\ref{tab:ajustes_nsga2}.
 % -----------------------------------------------
 
 Las figuras~\ref{fig:ang_avt} y~\ref{fig:ang_opt} muestran la posición del
-ciclista en el configuración actual y en la configuración optimizada,
-respectivamente, con los ángulos articulares superpuestos. La comparación
+ciclista en la configuración actual y en la configuración optimizada,
+respectivamente, con los ángulos articulares superpuestos. Los valores de la
+configuración actual corresponden a la cinemática registrada durante la sesión
+de adquisición, sin ningún ajuste previo a excepción de la altura del sillín.
+Los ángulos de la configuración optimizada fueron recalculados mediante
+cinemática inversa sobre el gemelo digital, a partir de los desplazamientos
+aplicados a los puntos de anclaje de sillín y manillar. La comparación
 visual permite apreciar el efecto global de los ajustes propuestos sobre la
 postura en la bicicleta.
 
@@ -629,9 +651,9 @@ frontal.
 
 En la figura~\ref{fig:angulo_rodilla} se presenta el ángulo de rodilla en
 función de la fase del ciclo de pedaleo, expresada en grados de~0 a~360.
-Cada punto corresponde a una muestra real de la sesión, configuración actual,
-o a un valor recalculado mediante cinemática inversa sobre el gemelo digital,
-configuración optimizada. Es importante destacar que el punto de anclaje
+Los puntos rojos corresponden a muestras reales de la sesión (configuración
+actual); los puntos verdes, a valores recalculados mediante cinemática inversa
+sobre el gemelo digital (configuración optimizada). Es importante destacar que el punto de anclaje
 del pedal permanece fijo durante la optimización. Únicamente se modifican
 las posiciones del sillín y del manillar, por lo que los cambios en el ángulo
 de rodilla son consecuencia de la variación en la posición de la cadera.
@@ -660,7 +682,7 @@ condición y se alinea con las sensaciones subjetivas reportadas por el
 ciclista.
 
 En cuanto a la altura del manillar, la bicicleta disponía de cuatro
-espaciadores bajo el potencia, lo que resultaba en una posición del manillar
+espaciadores bajo la potencia, lo que resultaba en una posición del manillar
 elevada en exceso para un perfil de uso orientado al rendimiento. La
 reducción de 26{,}4~mm propuesta por el algoritmo equivale a retirar
 entre uno y dos espaciadores, lo que es un ajuste razonable y de fácil
