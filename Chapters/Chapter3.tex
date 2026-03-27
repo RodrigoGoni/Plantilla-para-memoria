@@ -192,11 +192,12 @@ cadencia para encontrar el desfase óptimo:
         de la periodicidad de la coordenada vertical de la rodilla ($y_{knee}$) con la
         transformada de Fourier de tiempo corto (STFT).
   \item Se obtuvo la señal de cadencia del sensor de potencia ($\omega_{sens}$).
-  \item Se calculó la correlación cruzada normalizada $R_{vs}(\tau)$ para encontrar el
+  \item Se calculó la correlación cruzada normalizada $R_{vs}(\tau)$, definida en la ecuación~\ref{eq:tau_opt}, para encontrar el
         desfase óptimo $\tau_{opt}$:
 \end{enumerate}
 
 \begin{equation}
+  \label{eq:tau_opt}
   \tau_{opt} = \arg \max_{\tau} \int_{-\infty}^{\infty} \omega_{vis}(t) \cdot \omega_{sens}(t+\tau) \, dt
 \end{equation}
 
@@ -236,20 +237,21 @@ construyeron marcos de referencia ortonormales para cada segmento corporal
 favor del álgebra vectorial tridimensional.
 
 Para el segmento femoral, se definió el origen $O_f$ en el centro articular de
-la cadera (HJC). Se construyó el eje longitudinal $\mathbf{Y}_f$ mediante el
+la cadera (HJC). El eje longitudinal $\mathbf{Y}_f$ de la ecuación~\ref{eq:Yf} se construyó mediante el
 vector unitario que conecta el punto medio de los epicóndilos femorales
 ($\mathbf{M}_{FE}$) con el HJC:
 
 \begin{equation}
+  \label{eq:Yf}
   \mathbf{Y}_f = \frac{\mathbf{r}_{HJC} - \mathbf{M}_{FE}}{||\mathbf{r}_{HJC} - \mathbf{M}_{FE}||}
 \end{equation}
 
 Para resolver la orientación espacial, se definió un eje auxiliar
 $\mathbf{Z}_{temp}$ que une los epicóndilos lateral y medial, lo que permitió
-calcular el eje antero-posterior $\mathbf{X}_f$ mediante producto vectorial, lo
-que aseguró la ortogonalidad respecto al plano cuasi-frontal:
+calcular el eje antero-posterior $\mathbf{X}_f$ de la ecuación~\ref{eq:XfZf} mediante producto vectorial, lo que aseguró la ortogonalidad respecto al plano cuasi-frontal:
 
 \begin{equation}
+  \label{eq:XfZf}
   \mathbf{X}_f = \frac{\mathbf{Y}_f \times \mathbf{Z}_{temp}}{||\mathbf{Y}_f \times \mathbf{Z}_{temp}||}, \quad \quad \mathbf{Z}_f = \mathbf{X}_f \times \mathbf{Y}_f
 \end{equation}
 
@@ -262,9 +264,10 @@ La cinemática angular de la rodilla se obtuvo mediante la proyección de la
 orientación del marco tibial sobre el espacio vectorial del fémur. Se
 definieron ${}^G\mathbf{R}_f$ y ${}^G\mathbf{R}_t$ como las matrices de
 rotación absoluta de fémur y tibia respecto al sistema global, y la matriz de
-orientación relativa ${}^f\mathbf{R}_t$ se calculó como:
+orientación relativa ${}^f\mathbf{R}_t$ de la ecuación~\ref{eq:rotation_matrix} se calculó como:
 
 \begin{equation}
+  \label{eq:rotation_matrix}
   {}^f\mathbf{R}_t = ({}^G\mathbf{R}_f)^T \cdot {}^G\mathbf{R}_t = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}
 \end{equation}
 
@@ -272,13 +275,14 @@ Para descomponer esta matriz en métricas clínicamente significativas, se
 implementó la secuencia de rotación de Grood \& Suntay (Z-X-Y), estándar ISB
 para la rodilla \citep{GroodSuntay1983}. El ángulo de flexión/extensión
 ($\alpha$), variable crítica para la optimización de la altura del sillín, se
-extrajo mediante:
+extrajo mediante la ecuación~\ref{eq:alpha_flexion}:
 
 \begin{equation}
+  \label{eq:alpha_flexion}
   \alpha_{flexion} = \arctan2(-r_{12}, r_{22})
 \end{equation}
 
-Esta formulación desacopló matemáticamente la flexión pura de los movimientos
+La ecuación~\ref{eq:alpha_flexion} desacopló matemáticamente la flexión pura de los movimientos
 parásitos de abducción y rotación axial, lo que proporcionó una señal de
 entrada limpia para el algoritmo genético.
 
@@ -293,24 +297,27 @@ aplicaciones en tiempo real, se implementó un filtro de Kalman lineal
 constante (CA).
 
 Para cada grado de libertad articular $\theta$, se definió el vector de estado
-$\mathbf{x}_k$ en el instante $k$, el que incluyó explícitamente la velocidad y
+$\mathbf{x}_k$ de la ecuación~\ref{eq:kalman_state} en el instante $k$, el que incluyó explícitamente la velocidad y
 aceleración angular necesarias para la etapa dinámica posterior:
 
 \begin{equation}
+  \label{eq:kalman_state}
   \mathbf{x}_k = \begin{bmatrix} \theta_k \\ \dot{\theta}_k \\ \ddot{\theta}_k \end{bmatrix}
 \end{equation}
 
-El modelo de transición de estado a priori, el que predijo la cinemática en $k$
-basándose en $k-1$ y las ecuaciones de movimiento de Newton, se rigió por la
+El modelo de transición de estado a priori de la ecuación~\ref{eq:kalman_pred} predijo la cinemática en $k$
+basándose en $k-1$ y las ecuaciones de movimiento de Newton, rigiéndose por la
 matriz de transición $\mathbf{F}$:
 
 \begin{equation}
+  \label{eq:kalman_pred}
   \hat{\mathbf{x}}_{k|k-1} = \mathbf{F} \hat{\mathbf{x}}_{k-1|k-1}
 \end{equation}
 
-donde la matriz de transición de estado se define como:
+donde la matriz de transición de estado $\mathbf{F}$ se define en la ecuación~\ref{eq:kalman_F} como:
 
 \begin{equation}
+  \label{eq:kalman_F}
   \mathbf{F} =
   \begin{bmatrix}
     1 & \Delta t & \dfrac{1}{2}\Delta t^2 \\
@@ -320,12 +327,13 @@ donde la matriz de transición de estado se define como:
 \end{equation}
 
 La incertidumbre del modelo se gestionó mediante la matriz de covarianza del
-ruido del proceso $\mathbf{Q}$, la que fue diseñada para modelar la
+ruido del proceso $\mathbf{Q}$ de la ecuación~\ref{eq:kalman_Q}, diseñada para modelar la
 sobreaceleración (\textit{jerk}) como un ruido blanco espectral con densidad
 $\Phi_s$. Esto permitió que el filtro se adaptara dinámicamente a cambios
 bruscos de cadencia sin perder la suavidad de la señal:
 
 \begin{equation}
+  \label{eq:kalman_Q}
   \mathbf{Q} = \Phi_s \begin{bmatrix} \frac{\Delta t^5}{20} & \frac{\Delta t^4}{8} & \frac{\Delta t^3}{6} \\ \frac{\Delta t^4}{8} & \frac{\Delta t^3}{3} & \frac{\Delta t^2}{2} \\ \frac{\Delta t^3}{6} & \frac{\Delta t^2}{2} & \Delta t \end{bmatrix}
 \end{equation}
 
@@ -347,10 +355,10 @@ ciclista.
 Aunque la vista lateral no captura directamente el área frontal, se aplicaron
 modelos basados en los estudios de Bassett et al.
 \citep{Bassett1999_HourRecord} y Heil \citep{Heil2001_BodyMassScaling}, los que
-correlacionaron la pose sagital con el área frontal efectiva. El modelo
-consideró la altura del torso y el ángulo de apertura de la cadera:
+correlacionaron la pose sagital con el área frontal efectiva. La ecuación~\ref{eq:A_proj} describe el modelo que consideró la altura del torso y el ángulo de apertura de la cadera:
 
 \begin{equation}
+  \label{eq:A_proj}
   A_{proj} \approx \alpha \cdot H_{torso} \cdot \sin(\theta_{cadera}) + \beta \cdot m_{ciclista}^{0.425} + \gamma
 \end{equation}
 
@@ -407,13 +415,14 @@ filtrada en la sección anterior.
 \subsubsection{Dinámica del segmento distal (pie)}
 El análisis inició en la interfaz pedal-pie. Las fuerzas externas
 $\mathbf{F}_{pedal} = [F_{px}, F_{py}]^T$ se descompusieron en el sistema
-global. Mediante la aplicación de la segunda ley de Newton, se calcularon las
-fuerzas de reacción en el tobillo ($\mathbf{F}_{ankle}$):
+global. Las ecuaciones~\ref{eq:F_ankle_x} y~\ref{eq:F_ankle_y} expresan las fuerzas de reacción en el tobillo ($\mathbf{F}_{ankle}$), deducidas mediante la segunda ley de Newton:
 
 \begin{equation}
+  \label{eq:F_ankle_x}
   F_{ankle\_x} = m_{foot} a_{foot\_x} - F_{px}
 \end{equation}
 \begin{equation}
+  \label{eq:F_ankle_y}
   F_{ankle\_y} = m_{foot} (a_{foot\_y} + g) - F_{py}
 \end{equation}
 
@@ -422,38 +431,44 @@ centro de masas (CM) para eliminar el término de aceleración lineal del CM. El
 torque neto muscular en el tobillo $M_{ankle}$ se despejó mediante la
 consideración de los momentos generados por las fuerzas de reacción y la
 inercia rotacional del segmento. El momento inercial y el momento del pedal se
-expresan como:
+expre san en la ecuación~\ref{eq:M_inercial_pie}:
 
 \begin{equation}
+  \label{eq:M_inercial_pie}
   M_{inercial} = I_{foot} \alpha_{foot} - M_{pedal}
 \end{equation}
 
 Los momentos generados por las fuerzas de reacción en el tobillo respecto al CM
-del pie son:
+del pie se definen en la ecuación~\ref{eq:M_ankle_reaction}:
 
 \begin{equation}
+  \label{eq:M_ankle_reaction}
   M_{ankle\_reaction} = -(x_{ankle}-x_{cm}) F_{ankle_y} + (y_{ankle}-y_{cm}) F_{ankle_x}
 \end{equation}
 
-Los momentos generados en el pedal respecto al CM del pie son:
+Los momentos generados en el pedal respecto al CM del pie se definen en la ecuación~\ref{eq:M_pedal_reaction}:
 
 \begin{equation}
+  \label{eq:M_pedal_reaction}
   M_{pedal\_reaction} = -(x_{pedal}-x_{cm}) F_{py} + (y_{pedal}-y_{cm}) F_{px}
 \end{equation}
 
-Finalmente, el torque neto en el tobillo se calcula como:
+Finalmente, el torque neto en el tobillo se calcula como se muestra en la
+ecuación~\ref{eq:M_ankle}:
 
 \begin{equation}
+  \label{eq:M_ankle}
   M_{ankle} = M_{inercial} + M_{ankle\_reaction} + M_{pedal\_reaction}
 \end{equation}
 
 \subsubsection{Propagación recursiva (pierna y muslo)}
 Siguiendo el principio de acción y reacción (tercera ley de Newton), las
 fuerzas y momentos ejercidos por el pie sobre la pierna fueron
-$-\mathbf{F}_{ankle}$ y $-M_{ankle}$. Para el segmento de la pierna (shank),
-las ecuaciones de equilibrio en la rodilla se formularon como:
+$-\mathbf{F}_{ankle}$ (ecuaciones~\ref{eq:F_ankle_x} y~\ref{eq:F_ankle_y}) y $-M_{ankle}$ (ecuación~\ref{eq:M_ankle}). Para el segmento de la pierna (shank),
+la ecuación~\ref{eq:F_knee} expresa el equilibrio de fuerzas en la rodilla:
 
 \begin{equation}
+  \label{eq:F_knee}
   \mathbf{F}_{knee} = m_{shank} (\mathbf{a}_{shank} - \mathbf{g}) + \mathbf{F}_{ankle}
 \end{equation}
 
@@ -461,28 +476,33 @@ El momento neto en la rodilla $M_{knee}$, variable crítica que el optimizador
 buscó minimizar para reducir el riesgo de lesión patelar, se calculó mediante
 la suma de los torques inerciales y los producidos por las fuerzas articulares
 distales y proximales respecto al CM de la pierna. El momento inercial de la
-pierna y la transmisión del momento del tobillo se expresan como:
+pierna y la transmisión del momento del tobillo se expresan en la ecuación~\ref{eq:M_inercial_shank}:
 
 \begin{equation}
+  \label{eq:M_inercial_shank}
   M_{inercial\_shank} = I_{shank} \alpha_{shank} + M_{ankle}
 \end{equation}
 
 Los momentos generados por las fuerzas de reacción en la rodilla respecto al CM
-de la pierna son:
+de la pierna se definen en la ecuación~\ref{eq:M_knee_reaction}:
 
 \begin{equation}
+  \label{eq:M_knee_reaction}
   M_{knee\_reaction} = -(x_{knee}-x_{cm}) F_{knee_y} + (y_{knee}-y_{cm}) F_{knee_x}
 \end{equation}
 
-Los momentos generados en el tobillo respecto al CM de la pierna son:
+Los momentos generados en el tobillo respecto al CM de la pierna se definen en la ecuación~\ref{eq:M_ankle_shank}:
 
 \begin{equation}
+  \label{eq:M_ankle_shank}
   M_{ankle\_shank} = (x_{ankle}-x_{cm}) F_{ankle_y} - (y_{ankle}-y_{cm}) F_{ankle_x}
 \end{equation}
 
-Finalmente, el momento neto en la rodilla se calcula como:
+Finalmente, el momento neto en la rodilla se calcula como se indica en la
+ecuación~\ref{eq:M_knee}:
 
 \begin{equation}
+  \label{eq:M_knee}
   M_{knee} = M_{inercial\_shank} + M_{knee\_reaction} + M_{ankle\_shank}
 \end{equation}
 
@@ -494,9 +514,10 @@ Finalmente, la eficiencia biomecánica se cuantificó mediante la potencia
 mecánica instantánea $P_{joint}$ generada o absorbida en cada articulación.
 Esta métrica integró la salida cinética con la cinemática, y se calculó como el
 producto escalar del momento neto y la velocidad angular relativa de la
-articulación $\omega_{joint}$:
+articulación $\omega_{joint}$ según la ecuación~\ref{eq:P_joint}:
 
 \begin{equation}
+  \label{eq:P_joint}
   P_{joint}(t) = M_{joint}(t) \cdot (\dot{\theta}_{proximal}(t) - \dot{\theta}_{distal}(t))
 \end{equation}
 
@@ -535,9 +556,11 @@ Para adaptar la red de propósito general al contexto del ciclismo, se
 implementó un filtro de prior cinemático. Dado que el ciclismo con calas
 automáticas constituye una cadena cinética cerrada, la longitud de los
 segmentos óseos debe permanecer invariante. El sistema penalizó y corrigió
-detecciones que violaron la antropometría del sujeto:
+detecciones que violaron la antropometría del sujeto
+según el criterio de la ecuación~\ref{eq:kinematic_correction}:
 
 \begin{equation}
+  \label{eq:kinematic_correction}
   |L_{seg}(t) - \mu_{L_{seg}}| > \epsilon \Rightarrow \text{Corrección por cinemática inversa}
 \end{equation}
 
@@ -603,9 +626,10 @@ representa la configuración geométrica de la bicicleta. Aunque una bicicleta
 moderna puede tener decenas de parámetros ajustables, el análisis de
 sensibilidad realizado en la fase de comprensión del negocio indicó que la
 eficiencia biomecánica está dominada por cuatro variables principales en el
-plano sagital. Por tanto, el vector $\mathbf{x}$ se define como:
+plano sagital. Por tanto, el vector $\mathbf{x}$ de la ecuación~\ref{eq:decision_vector} se define como:
 
 \begin{equation}
+  \label{eq:decision_vector}
   \mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \\ x_3 \\ x_4 \end{bmatrix} = \begin{bmatrix} h_{\text{sillin}} \\ r_{\text{sillin}} \\ h_{\text{manillar}} \\ a_{\text{manillar}} \end{bmatrix}
 \end{equation}
 
@@ -620,10 +644,11 @@ Donde:
 \subsubsection{Restricciones del espacio de diseño}
 
 El espacio de búsqueda $\Omega$ no es infinito. Está acotado por límites
-físicos y antropométricos. Estas se modelan como restricciones de caja, que
+físicos y antropométricos. Estas se modelan como restricciones de caja descritas en la ecuación~\ref{eq:search_space}, las que
 definen las soluciones factibles:
 
 \begin{equation}
+  \label{eq:search_space}
   \Omega = \{ \mathbf{x} \in \mathbb{R}^{4} \mid L_{\min,i} \leq x_i \leq L_{\max,i}, \quad \forall i=1,\dots,4 \}
 \end{equation}
 
@@ -661,10 +686,11 @@ articulares máximos/mínimos resultantes de simular el pedaleo con la
 configuración $\mathbf{x}$. Para cada ángulo $\theta_k$, se define un rango
 seguro $[\theta_{\min, k}, \theta_{\max, k}]$ basado en la literatura clínica.
 
-La función de coste $J_{\text{comfort}}$ se define como la suma de las
+La función de coste $J_{\text{comfort}}$ se define en la ecuación~\ref{eq:J_comfort} como la suma de las
 desviaciones cuadráticas fuera de estos rangos:
 
 \begin{equation}
+  \label{eq:J_comfort}
   J_{\text{comfort}}(\mathbf{x}) = \sum_{k \in \text{articulaciones}} w_k \cdot \left( \max(0, \theta_{\min,k} - \theta_k(\mathbf{x}))^2 + \max(0, \theta_k(\mathbf{x}) - \theta_{\max,k})^2 \right)
 \end{equation}
 
@@ -686,11 +712,12 @@ ello se utiliza la minimización de los momentos articulares netos necesarios
 para producir una potencia objetivo.
 
 Con base en la dinámica inversa calculada en la sección
-\ref{sec:modelado_cinematico}, para una configuración $\mathbf{x}$ dada, se
+\ref{sec:modelado_cinematico}, ecuaciones~\ref{eq:M_ankle} a~\ref{eq:M_knee}, para una configuración $\mathbf{x}$ dada, se
 calcula el perfil de torques articulares $M(t)$ a lo largo del ciclo de
-pedaleo. La función de coste se define como la integral del torque al cuadrado:
+pedaleo. La función de coste $J_{\text{power}}$ de la ecuación~\ref{eq:J_power} se define como la integral del torque al cuadrado:
 
 \begin{equation}
+  \label{eq:J_power}
   J_{\text{power}}(\mathbf{x}) = \int_{0}^{T_{\text{ciclo}}} \left( \alpha \|M_{\text{cadera}}(t, \mathbf{x})\|^2 + \beta \|M_{\text{rodilla}}(t, \mathbf{x})\|^2 \right) dt
 \end{equation}
 
@@ -714,10 +741,11 @@ factor llevaría a soluciones biomecánicamente cómodas pero competitivamente
 inviables.
 
 El modelo de estimación descrito en la sección \ref{subsec:estimacion_aerodinamica}
-proporciona el área frontal proyectada $A_{\text{proj}}(\mathbf{x})$. La
-función de coste es directa:
+proporciona el área frontal proyectada $A_{\text{proj}}(\mathbf{x})$ de la ecuación~\ref{eq:A_proj}. La
+función de coste $J_{\text{aero}}$ de la ecuación~\ref{eq:J_aero} es:
 
 \begin{equation}
+  \label{eq:J_aero}
   J_{\text{aero}}(\mathbf{x}) = A_{\text{proj}}(\mathbf{x}) \approx C \cdot \sin(\theta_{\text{torso}}(\mathbf{x})) + K
 \end{equation}
 
@@ -731,7 +759,7 @@ navegar este compromiso.
 \subsection{Selección y diseño del algoritmo de optimización}
 
 Para resolver el problema de minimizar el vector $\mathbf{J} =
-  [J_{\text{comfort}}, J_{\text{power}}, J_{\text{aero}}]^T$, se evaluaron
+  [J_{\text{comfort}}, J_{\text{power}}, J_{\text{aero}}]^T$, ecuaciones~\ref{eq:J_comfort},~\ref{eq:J_power} y~\ref{eq:J_aero}, se evaluaron
 diversas familias de algoritmos. La elección de un \textit{algoritmo genético}
 se justifica por la naturaleza de la superficie de respuesta del problema
 biomecánico.
@@ -763,15 +791,16 @@ biomecánico.
 Se diseñó una variante específica del algoritmo conocida como algoritmo
 genético de codificación real. A diferencia de los algoritmos clásicos que
 utilizan cadenas de bits, este opera directamente con vectores de números
-flotantes.
+flotantes. La tabla~\ref{tab:configuracion_ag} resume los operadores y
+parámetros seleccionados.
 
 \begin{table}[h]
   \centering
-  \caption{Configuración de operadores del algoritmo genético NSGA-II implementado.}
+  \caption{\textbf{Configuración de operadores del algoritmo genético NSGA-II implementado.}}
   \label{tab:configuracion_ag}
   \begin{tabular}{c p{0.28\textwidth} p{0.38\textwidth}}
     \toprule
-    N° & Componente               & Selección / Valor                           \\
+    \textbf{N°} & \textbf{Componente} & \textbf{Selección / Valor} \\
     \midrule
     1  & Representación           & Vector real (\texttt{float64})              \\
     2  & Inicialización           & Muestreo aleatorio uniforme (\texttt{FloatRandomSampling}) \\
@@ -825,13 +854,14 @@ La elección de cada componente se justifica a continuación.
 Aunque el problema es multiobjetivo, para el despliegue final se requiere una
 única recomendación accionable. Se implementó una estrategia de escalarización
 \textit{a priori}, donde el usuario define sus preferencias antes de la
-optimización mediante coeficientes de peso $\lambda$:
+optimización mediante coeficientes de peso $\lambda$ según la ecuación~\ref{eq:scalarization}:
 
 \begin{equation}
+  \label{eq:scalarization}
   F(\mathbf{x}) = \lambda_1 \tilde{J}_{\text{comfort}}(\mathbf{x}) + \lambda_2 \tilde{J}_{\text{power}}(\mathbf{x}) + \lambda_3 \tilde{J}_{\text{aero}}(\mathbf{x})
 \end{equation}
 
-Donde $\tilde{J}$ indica que las funciones han sido normalizadas para evitar
+Donde $\tilde{J}$ de la ecuación~\ref{eq:scalarization} indica que las funciones han sido normalizadas para evitar
 que magnitudes numéricas grandes dominen sobre las pequeñas.
 
 Perfiles de usuario:
@@ -866,8 +896,9 @@ genético para generar directrices operativas.
   \item Conocimiento: reportar +5 mm sería un error de diseño por falsa precisión.
         Las herramientas manuales y el error de paralaje humano impiden ajustes con tal
         precisión. Además, existen zonas de insensibilidad fisiológica. Se implementó
-        un filtro de banda muerta:
+        un filtro de banda muerta descrito en la ecuación~\ref{eq:dead_band}:
         \begin{equation}
+          \label{eq:dead_band}
           \text{Acción}_i = \begin{cases}
             \text{MANTENER} & \text{si } |\Delta x_i| < \epsilon_{\text{tolerancia}}    \\
             \text{AJUSTAR}  & \text{si } |\Delta x_i| \geq \epsilon_{\text{tolerancia}}
@@ -898,12 +929,12 @@ lingüísticas. La tabla \ref{tab:acciones} resume las acciones necesarias.
 
 \begin{table}[h]
   \centering
-  \caption{Tabla de acciones.}
+  \caption{\textbf{Tabla de acciones.}}
   \label{tab:acciones}
   \small
   \begin{tabular}{p{0.14\linewidth}ccp{0.22\linewidth}r}
     \toprule
-    Componente & Ajuste actual & Ajuste objetivo & Acción requerida       & Magnitud \\
+    \textbf{Componente} & \textbf{Ajuste actual} & \textbf{Ajuste objetivo} & \textbf{Acción requerida} & \textbf{Magnitud} \\
     \midrule
     Sillín     & 740 mm        & 752 mm          & SUBIR $\uparrow$       & 12 mm    \\
     Sillín     & 60 mm         & 58 mm           & ADELANTAR $\leftarrow$ & 2 mm     \\

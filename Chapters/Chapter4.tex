@@ -154,6 +154,7 @@ tras el filtrado de inicio. El error de sincronización obtenido fue de
             \toprule
             \textbf{Variable}  & \textbf{Unidad} & \textbf{Media} &
             \textbf{Máximo} & \textbf{Mínimo} & \textbf{Desv. est.} \\
+            \midrule
             Potencia           & W    & 193{,}3 & 251{,}0 & 129{,}0 & 38{,}1  \\
             Cadencia           & RPM  & 91{,}8  & 101{,}0 & 77{,}0  & 3{,}8   \\
             Frec.\ cardíaca    & BPM  & 147{,}1 & 170{,}0 & 116{,}0 & 15{,}1  \\
@@ -177,7 +178,7 @@ con el flujo de transformación de los datos a lo largo de cada etapa.
 % --- Figura: diagrama del pipeline ---
 \begin{figure}[H]
       \centering
-      \includegraphics[width=0.99\textwidth]{./Figures/pipeline_real.png}
+      \includegraphics[width=0.97\textwidth]{./Figures/pipeline_real.png}
       \caption{Diagrama del pipeline de procesamiento y optimización.}
       \label{fig:pipeline}
 \end{figure}
@@ -228,6 +229,7 @@ tabla~\ref{tab:calibracion}.
       \begin{tabular}{p{0.42\linewidth}p{0.25\linewidth}p{0.18\linewidth}}
             \toprule
             \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
             Referencia de calibración  & Rueda (estándar 700c)        & 622~mm           \\
             Resolución de la imagen    & Ancho $\times$ alto          & 1280$\times$720~px \\
             Factor de conversión       & Píxeles por milímetro        & 2{,}853~px/mm    \\
@@ -372,6 +374,7 @@ tabla~\ref{tab:params_kalman}.
       \begin{tabular}{p{0.22\linewidth}p{0.46\linewidth}p{0.20\linewidth}}
             \toprule
             \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
             $Q$      & Varianza del ruido de proceso           & $0{,}01$         \\
             $R$  & Varianza del ruido de medición          & $0{,}10$         \\
             $P_0$                               & Covarianza inicial del estado           & $1000\cdot I$    \\
@@ -459,14 +462,14 @@ se indica con una estrella.
 \begin{figure}[H]
       \centering
       \includegraphics[width=0.99\textwidth]{./Figures/evol_solv_ag.png}
-      \caption{Frente de Pareto del NSGA-II en el plano $J_{\text{confort}}$--$J_{\text{power}}$. La escala de color codifica $J_{\text{aero}}$; la estrella indica la solución de compromiso.}
+      \caption{Frente de Pareto del NSGA-II en el plano $J_{\text{confort}}$--$J_{\text{power}}$. La escala de color codifica $J_{\text{aero}}$. La estrella indica la solución de compromiso.}
       \label{fig:pareto_2d}
 \end{figure}
 % ------------------------------------
 
-Los parámetros del algoritmo NSGA-II y las restricciones articulares
-empleadas se detallan en las tablas~\ref{tab:params_nsga2}
-y~\ref{tab:constraints_nsga2}.
+Los parámetros del algoritmo NSGA-II, el espacio de búsqueda y las restricciones articulares
+empleadas se detallan en las tablas~\ref{tab:params_nsga2},
+\ref{tab:espacio_nsga2} y~\ref{tab:constraints_nsga2}.
 
 % --- Tabla: parámetros NSGA-II ---
 \begin{table}[H]
@@ -477,6 +480,7 @@ y~\ref{tab:constraints_nsga2}.
       \begin{tabular}{p{0.30\linewidth}p{0.42\linewidth}p{0.18\linewidth}}
             \toprule
             \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
             \texttt{pop\_size}       & Tamaño de la población                             & 300       \\
             \texttt{n\_max\_gen}    & Límite máximo de generaciones                      & 300       \\
             \texttt{seed}            & Semilla aleatoria para reproducibilidad            & 42        \\
@@ -504,6 +508,7 @@ y~\ref{tab:constraints_nsga2}.
       \begin{tabular}{p{0.30\linewidth}p{0.42\linewidth}p{0.18\linewidth}}
             \toprule
             \textbf{Variable} & \textbf{Descripción} & \textbf{Rango} \\
+            \midrule
             $\Delta\mathrm{hip}_x$      & Retroceso/avance del sillín  & $[-15,\;+15]$~mm \\
             $\Delta\mathrm{hip}_y$      & Elevación del sillín         & $[-50,\;+50]$~mm \\
             $\Delta\mathrm{hb\_reach}$ & Alcance del manillar         & $[-25,\;+25]$~mm \\
@@ -524,6 +529,7 @@ y~\ref{tab:constraints_nsga2}.
             \toprule
             \textbf{Articulación} & \textbf{Mín (°)} & \textbf{Máx (°)} &
             \textbf{Peso $w$} & \textbf{Estadístico} \\
+            \midrule
             Rodilla    & 138 & 145 & 20{,}0 & Máximo del ciclo (BDC) \\
             Cadera     & 50  & 70  & 10{,}0 & Mínimo del ciclo (TDC) \\
             Hombro     & 80  & 100 &  2{,}0 & Media del ciclo        \\
@@ -568,6 +574,7 @@ recomendados se detallan en la tabla~\ref{tab:ajustes_nsga2}.
       \begin{tabular}{p{0.22\linewidth}p{0.52\linewidth}c}
             \toprule
             \textbf{Función objetivo} & \textbf{Descripción} & \textbf{Valor} \\
+            \midrule
             $J_{\text{confort}}$ & Índice de riesgo de lesión articular & 3052{,}88 \\
             $J_{\text{power}}$   & Índice de eficiencia de pedaleo  & 1{,}09 \\
             $J_{\text{aero}}$    & Área frontal estimada normalizada & 0{,}31 \\
@@ -586,6 +593,7 @@ recomendados se detallan en la tabla~\ref{tab:ajustes_nsga2}.
             \toprule
             \textbf{Componente} & \textbf{Ajuste} & \textbf{Magnitud (mm)} &
             \textbf{Dirección} \\
+            \midrule
             Sillín & Posición horizontal, fore/aft & 13{,}5 & Hacia atrás \\
             Sillín & Altura                                  & 11{,}4 & Subir       \\
             Manillar & Alcance, reach              & 23{,}0 & Acortar     \\
@@ -652,7 +660,7 @@ frontal.
 En la figura~\ref{fig:angulo_rodilla} se presenta el ángulo de rodilla en
 función de la fase del ciclo de pedaleo, expresada en grados de~0 a~360.
 Los puntos rojos corresponden a muestras reales de la sesión (configuración
-actual); los puntos verdes, a valores recalculados mediante cinemática inversa
+actual), mientras que los puntos verdes, a valores recalculados mediante cinemática inversa
 sobre el gemelo digital (configuración optimizada). Es importante destacar que el punto de anclaje
 del pedal permanece fijo durante la optimización. Únicamente se modifican
 las posiciones del sillín y del manillar, por lo que los cambios en el ángulo
