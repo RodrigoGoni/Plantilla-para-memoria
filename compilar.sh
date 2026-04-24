@@ -7,6 +7,7 @@ rm -f portada.aux
 rm -f *.aux *.bbl *.blg *.log *.out *.toc *.lof *.lot *.run.xml Chapters/*.aux
 # Compilar
 pdflatex -interaction=nonstopmode memorianueva
-bibtex memorianueva
+biber memorianueva
+pdflatex -interaction=nonstopmode memorianueva
 pdflatex -interaction=nonstopmode memorianueva
 pdflatex -interaction=nonstopmode memorianueva

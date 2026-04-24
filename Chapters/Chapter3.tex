@@ -11,7 +11,7 @@ de recomendaciones.
 %----------------------------------------------------------------------------------------
 %	METODOLOGÍA
 %----------------------------------------------------------------------------------------
-\section{Metodología}
+\section{Metodología de trabajo adoptada}
 \label{sec:metodologia}
 
 % Tono: Pasado (describe lo que SE HIZO en el trabajo).
@@ -23,6 +23,19 @@ optimización biomecánica asistida por inteligencia artificial, como se describ
 en la sección 8 del documento de planificación \citep{RGv5Goni}.
 
 % Tono: Pasado (el trabajo de adaptación).
+La figura \ref{fig:crisp_dm_flujo} muestra el diagrama de flujo de la
+metodología implementada.
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.8\textwidth]{Imagenes/crisp_dm.png} % Descomentar para usar la imagen real
+  % --- Inicio: Placeholder de la figura ---
+  \includegraphics[width=0.65\textwidth]{./Figures/crispdm.pdf}
+  % --- Fin: Placeholder de la figura ---
+  \caption{Diagrama de flujo de la metodología CRISP-DM adaptada para el trabajo.}
+  \label{fig:crisp_dm_flujo}
+\end{figure}
+
 El modelo se reestructuró en las siguientes fases principales, que fueron
 ajustadas al contexto del trabajo:
 
@@ -39,19 +52,6 @@ ajustadas al contexto del trabajo:
         recomendaciones para el ciclista.
 \end{itemize}
 
-La figura \ref{fig:crisp_dm_flujo} muestra el diagrama de flujo de la
-metodología implementada.
-
-\begin{figure}[H]
-  \centering
-  % \includegraphics[width=0.8\textwidth]{Imagenes/crisp_dm.png} % Descomentar para usar la imagen real
-  % --- Inicio: Placeholder de la figura ---
-  \includegraphics[width=0.7\textwidth]{./Figures/crispdm.pdf}
-  % --- Fin: Placeholder de la figura ---
-  \caption{Diagrama de flujo de la metodología CRISP-DM adaptada para el trabajo.}
-  \label{fig:crisp_dm_flujo}
-\end{figure}
-
 %----------------------------------------------------------------------------------------
 %	ARQUITECTURA (Versión "Mapa General" para evitar redundancia)
 %----------------------------------------------------------------------------------------
@@ -62,22 +62,22 @@ En esta sección se detalla el diseño arquitectónico del sistema desarrollado.
 La solución fue estructurada como un flujo de trabajo lineal con
 retroalimentación de control cerrado, concebido para transformar flujos de
 datos estocásticos y asíncronos provenientes de video y sensores en
-recomendaciones biomecánicas accionables y deterministas.
+recomendaciones biomecánicas accionables y deterministas. El flujo lógico de
+datos se conceptualiza en el diagrama de bloques de la figura
+\ref{fig:arquitectura_sistema}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/Arquitectura_Pipeline.png}
+  \caption{Diagrama en bloques detallado de la arquitectura del \textit{pipeline} y el flujo de datos multimodal.}
+  \label{fig:arquitectura_sistema}
+\end{figure}
 
 La arquitectura modular permitió el desacoplamiento estricto de las capas de
 percepción, modelado físico y razonamiento algorítmico, lo que facilitó la
 actualización independiente de los modelos de redes neuronales o los parámetros
 del algoritmo genético sin comprometer la integridad operativa del sistema
 global.
-
-El flujo lógico de datos, conceptualizado en el diagrama de bloques de la
-figura \ref{fig:arquitectura_sistema}.
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.9\textwidth]{Figures/Arquitectura_Pipeline.pdf}
-  \caption{Diagrama en bloques detallado de la arquitectura del \textit{pipeline} y el flujo de datos multimodal.}
-  \label{fig:arquitectura_sistema}
-\end{figure}
 
 La arquitectura se organiza en cinco etapas secuenciales críticas que abordan
 desde la física de la adquisición de la señal hasta la convergencia matemática
@@ -108,7 +108,7 @@ de la solución óptima:
 Esta arquitectura fue diseñada para ejecutarse completamente en el borde, lo
 que permitió minimizar la latencia de inferencia y garantizar la privacidad de
 los datos biomecánicos del ciclista al mantener todo el procesamiento local sin
-necesidad de conexión a servicios externos. A continuación se detallan la
+necesidad de conexión a servicios externos. A continuación se detalla la
 implementación técnica específica de cada módulo.
 
 %----------------------------------------------------------------------------------------
@@ -533,7 +533,7 @@ $M_{knee}$, $M_{hip}$), velocidades angulares ($\omega_{knee}$) y el ángulo de
 flexión ($\alpha$) calculados mediante el método de dinámica inversa descrito.
 \begin{figure}[H]
   \centering
-  \includegraphics[width=1.0\textwidth]{Figures/esqueleto.png}
+  \includegraphics[width=.90\textwidth]{Figures/esqueleto.png}
   \caption{Gemelo digital biomecánico del ciclista mostrando el análisis de dinámica inversa plana.}
   \label{fig:gemelo_digital_biomecanico}
 \end{figure}
@@ -796,7 +796,7 @@ parámetros seleccionados.
 
 \begin{table}[h]
   \centering
-  \caption{\textbf{Configuración de operadores del algoritmo genético NSGA-II implementado.}}
+  \caption{Configuración de operadores del algoritmo genético NSGA-II implementado.}
   \label{tab:configuracion_ag}
   \begin{tabular}{c p{0.28\textwidth} p{0.38\textwidth}}
     \toprule
@@ -929,7 +929,7 @@ lingüísticas. La tabla \ref{tab:acciones} resume las acciones necesarias.
 
 \begin{table}[h]
   \centering
-  \caption{\textbf{Tabla de acciones.}}
+  \caption{Tabla de acciones.}
   \label{tab:acciones}
   \small
   \begin{tabular}{p{0.14\linewidth}ccp{0.22\linewidth}r}

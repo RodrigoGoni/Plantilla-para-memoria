@@ -29,7 +29,7 @@ rodillo inteligente. A continuación se describe cada una.
 % -----------------------------------------------------------------------------
 
 En una primera etapa, se utilizó una cámara USB Microsoft LifeCam HD-3000
-con una resolución de 1280$\times$720 píxeles a 30 FPS. Se realizaron pruebas
+con una resolución de 1280 $\times$ 720 píxeles a 30 FPS. Se realizaron pruebas
 de calidad de imagen y se determinó que el nivel de desenfoque de movimiento era
 excesivo. Para corroborar esta conclusión, se ejecutó el modelo de estimación
 de pose HRNet sobre una muestra de los fotogramas capturados, y se constató
@@ -205,10 +205,7 @@ mediante el script \texttt{calibrate\_image.py}. Se utilizó como
 referencia la rueda de la bicicleta, cuyo diámetro nominal es de 622~mm, correspondiente al estándar 700c. En la figura~\ref{fig:calibracion} se ilustra el proceso de
 calibración: sobre un fotograma representativo se superpone un círculo cuyos
 extremos se ajustan manualmente al contorno de la rueda, con lo que se obtiene
-la relación métrica de la cámara para esa sesión. Los resultados de la
-calibración y las longitudes de los segmentos rígidos del ciclista derivadas
-a partir del factor de conversión se presentan en la
-tabla~\ref{tab:calibracion}.
+la relación métrica de la cámara para esa sesión.
 
 % --- Figura: calibración métrica ---
 \begin{figure}[H]
@@ -218,6 +215,10 @@ tabla~\ref{tab:calibracion}.
       \label{fig:calibracion}
 \end{figure}
 % ------------------------------------
+
+Los resultados de la calibración y las longitudes de los segmentos rígidos del ciclista derivadas
+a partir del factor de conversión se presentan en la
+tabla~\ref{tab:calibracion}.
 
 % --- Tabla: resultados de calibración métrica ---
 \begin{table}[H]
@@ -297,7 +298,7 @@ procesamiento, en el orden en que se ejecutan sobre los datos de la sesión.
 
 La sincronización temporal entre los fotogramas de video y la telemetría del
 rodillo se realizó mediante el módulo \texttt{sync.py}, conforme al algoritmo
-descrito en la sección~\ref{ssec:sync_temporal}. Se empleó la búsqueda del
+descrito en la subsección~\ref{ssec:sync_temporal}. Se empleó la búsqueda del
 vecino más cercano con una tolerancia máxima de 500~ms. Los fotogramas sin
 muestra de telemetría asociada dentro de ese intervalo se excluyeron del
 análisis posterior.
@@ -323,7 +324,7 @@ Un fotograma representativo se presenta en la figura~\ref{fig:calidad_pixel_pose
 Las señales de telemetría, registradas a 1~Hz, se interpolaron hasta 30~FPS
 mediante el módulo \texttt{interpolation.py} con spline cúbico, usando las
 marcas temporales de los fotogramas como soporte, conforme a lo descrito en
-la sección~\ref{ssec:telemetria}. Cada fotograma recibió un valor interpolado
+la subsección~\ref{ssec:telemetria}. Cada fotograma recibió un valor interpolado
 de potencia, cadencia y frecuencia cardíaca.
 
 % -----------------------------------------------------------------------------
@@ -333,7 +334,7 @@ de potencia, cadencia y frecuencia cardíaca.
 
 Previo al cálculo biomecánico, las trayectorias de los puntos clave
 fueron refinadas mediante el módulo \texttt{keypoint\_processor.py},
-conforme al procedimiento descrito en la sección~\ref{subsec:cinematica_angular}.
+conforme al procedimiento descrito en la subsección~\ref{subsec:cinematica_angular}.
 El procesamiento comprendió tres pasos secuenciales:
 
 \begin{enumerate}
@@ -392,7 +393,7 @@ tabla~\ref{tab:params_kalman}.
 Los ángulos articulares del ciclista se calcularon a partir de las
 trayectorias de los puntos clave filtradas mediante el módulo
 \texttt{angles.py}, conforme a la formulación descrita en la
-sección~\ref{subsec:cinematica_angular}. Las articulaciones analizadas
+subsección~\ref{subsec:cinematica_angular}. Las articulaciones analizadas
 fueron rodilla, cadera, hombro y torso del lado izquierdo del ciclista,
 que era el lado visible ante la cámara durante la sesión de adquisición.
 
@@ -416,8 +417,8 @@ pedaleo y identificar zonas de inestabilidad cinemática.
 % -----------------------------------------------------------------------------
 
 Las fuerzas de reacción en los pedales se estimaron mediante el módulo
-\texttt{forces . py}, conforme al modelo de dinámica inversa plana descrito
-en la sección~\ref{subsec:dinamica_inversa}. Se calcularon las componentes
+\texttt{forces .py}, conforme al modelo de dinámica inversa plana descrito
+en la subsección~\ref{subsec:dinamica_inversa}. Se calcularon las componentes
 tangencial~$F_t$ y radial~$F_r$ de la fuerza sobre el pedal en cada
 fotograma a partir de los datos de potencia, cadencia y cinemática articular.
 
@@ -605,14 +606,7 @@ recomendados se detallan en la tabla~\ref{tab:ajustes_nsga2}.
 
 Las figuras~\ref{fig:ang_avt} y~\ref{fig:ang_opt} muestran la posición del
 ciclista en la configuración actual y en la configuración optimizada,
-respectivamente, con los ángulos articulares superpuestos. Los valores de la
-configuración actual corresponden a la cinemática registrada durante la sesión
-de adquisición, sin ningún ajuste previo a excepción de la altura del sillín.
-Los ángulos de la configuración optimizada fueron recalculados mediante
-cinemática inversa sobre el gemelo digital, a partir de los desplazamientos
-aplicados a los puntos de anclaje de sillín y manillar. La comparación
-visual permite apreciar el efecto global de los ajustes propuestos sobre la
-postura en la bicicleta.
+respectivamente, con los ángulos articulares superpuestos.
 
 % --- Figuras: posición actual y optimizada con ángulos ---
 \begin{figure}[H]
@@ -626,6 +620,14 @@ postura en la bicicleta.
       \label{fig:ang_comparacion}
 \end{figure}
 % ---------------------------------------------------------
+
+Los valores de la configuración actual corresponden a la cinemática registrada durante la sesión
+de adquisición, sin ningún ajuste previo a excepción de la altura del sillín.
+Los ángulos de la configuración optimizada fueron recalculados mediante
+cinemática inversa sobre el gemelo digital, a partir de los desplazamientos
+aplicados a los puntos de anclaje de sillín y manillar. La comparación
+visual permite apreciar el efecto global de los ajustes propuestos sobre la
+postura en la bicicleta.
 
 % -----------------------------------------------------------------------------
 \subsection{Análisis del ángulo de cadera y postura aerodinámica}
